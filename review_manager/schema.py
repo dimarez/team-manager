@@ -31,3 +31,5 @@ class Config(BaseModel):
     MERGE_REQUEST_PROJECT_PATH: Optional[str]
     MERGE_REQUEST_LABELS: Optional[str]
     PIPE_GITLAB_USER_ID: Optional[str]
+    MERGE_REQUEST_IID: Optional[str]
+    MERGE_REQUEST_PROJECT_URL: Optional[str]

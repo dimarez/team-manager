@@ -24,7 +24,7 @@ setup-review:
       - echo $MERGE_REQUEST_PROJECT_URL
       - echo "============================"
       - pip list
-  #    - python app.py
+      - python app.py
       - ls
   rules:
     - if: $CI_PIPELINE_SOURCE == "pipeline" && $PIPELINE_JOB == "setup-code-review"
