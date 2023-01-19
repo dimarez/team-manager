@@ -17,11 +17,15 @@ setup-review:
       - echo ${MERGE_REQUEST_LABELS}
       - echo ${CI_PIPELINE_SOURCE}
       - echo ${MERGE_REQUEST_TARGET_BRANCH_NAME}
+      - echo ${MERGE_REQUEST_SOURCE_BRANCH_NAME}
       - echo ${PIPELINE_JOB}
       - echo ${GITLAB_TOKEN}
+      - echo $API_V4_URL
+      - echo $MERGE_REQUEST_PROJECT_URL
       - echo "============================"
+      - set
       - pip list
-      - python app.py
+  #    - python app.py
       - ls
   rules:
     - if: $CI_PIPELINE_SOURCE == "pipeline" && $PIPELINE_JOB == "setup-code-review"
