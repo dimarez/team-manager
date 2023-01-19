@@ -19,6 +19,8 @@ def main():
         cfg = Config.parse_obj(os.environ)
         teams = Team(setup, cfg)
 
+        print(cfg)
+
 
 
 
