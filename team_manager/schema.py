@@ -25,8 +25,8 @@ class User(BaseModel):
 
 
 class Config(BaseModel):
-    GITLAB_TOKEN: Optional[str]
-    GITLAB_URL: Optional[str]
+    GITLAB_TOKEN: str
+    GITLAB_URL: str
     MERGE_REQUEST_IID: Optional[str]
     MERGE_REQUEST_PROJECT_PATH: Optional[str]
     MERGE_REQUEST_LABELS: Optional[str]

@@ -1,5 +1,4 @@
 .venv
-pyproject.toml
 poetry.lock
 main.py
 setup_code_reviev.py

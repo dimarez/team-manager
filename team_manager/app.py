@@ -2,7 +2,7 @@ import logging
 import os
 
 import yaml
-from .schemas import Config
+from .schema import Config
 from .team import Team
 
 

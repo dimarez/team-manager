@@ -1,6 +1,6 @@
 from typing import Union
 import gitlab
-from .schemas import User
+from .schema import User
 from loguru import logger as log
 
 
@@ -58,9 +58,6 @@ def create_users_list(configuration, gitlab_token, gitlab_url) -> tuple[dict[str
     ucache.clear()
     gl.session.close()
     return users, reviewers
-
-
-
 
 
 def gitlab_get_user_data(username: str, link: gitlab.client.Gitlab, team: str, lead: str) -> Union[User, None]:
