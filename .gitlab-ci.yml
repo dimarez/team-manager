@@ -23,7 +23,6 @@ setup-review:
       - echo $API_V4_URL
       - echo $MERGE_REQUEST_PROJECT_URL
       - echo "============================"
-      - set
       - pip list
   #    - python app.py
       - ls

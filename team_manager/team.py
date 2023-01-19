@@ -11,7 +11,7 @@ class Team:
     _GITLAB_URL: str
 
     def __init__(self, setup, config):
-        self._GITLAB_URL = config.GITLAB_URL
+        self._GITLAB_URL = config.CI_SERVER_URL
         self._GITLAB_TOKEN = config.GITLAB_TOKEN
         self._users, self._reviewers = create_users_list(setup, self._GITLAB_TOKEN, self._GITLAB_URL)
 
