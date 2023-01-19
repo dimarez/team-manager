@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "team-manager"
+version = "0.1.0"
+description = ""
+authors = ["Dmitriy Reznichenko <drezn@a-fin.tech>"]
+readme = "README.md"
+packages = [{include = "team_manager"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pyyaml = "^6.0"
+pydantic = "^1.10.4"
+python-gitlab = "^3.12.0"
+loguru = "^0.6.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
