@@ -1,0 +1,29 @@
+default:
+  tags:
+  - docker-yc
+
+stages:          
+  - setup-review
+
+setup-review:       
+  stage: setup-review
+  image: "${HARBOR_URL}/devops/python:latest"
+  script:
+      - echo "============================"
+      - echo ${MERGE_REQUEST_ID}
+      - echo ${MERGE_REQUEST_IID}
+      - echo ${MERGE_REQUEST_PROJECT_PATH}
+      - echo ${MERGE_REQUEST_PROJECT_ID}    
+      - echo ${MERGE_REQUEST_LABELS}
+      - echo ${CI_PIPELINE_SOURCE}
+      - echo ${MERGE_REQUEST_TARGET_BRANCH_NAME}
+      - echo ${PIPELINE_JOB}
+      - echo "============================"
+      - python --version
+      - pip list
+      - ls
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "pipeline" && $PIPELINE_JOB == "setup-code-review"
+  allow_failure: false
+
+

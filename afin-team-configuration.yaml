@@ -1,0 +1,29 @@
+
+teams:
+    - green:
+        lead: a.obedin
+        members:
+            - reznichenko
+            - a.moiseichev  
+            - artemov
+        reviewers:
+            - reznichenko
+            - a.obedin
+            - a.moiseichev
+            - a.solovyeva
+    - blue:
+        lead: a.obedin
+        members:
+            - reznichenko
+            - a.solovyeva
+            - mesniankin2
+        reviewers:
+            - reznichenko
+            - a.obedin
+            - artemov
+            
+# projects:
+#     exclude:
+#         - devops
+
+
