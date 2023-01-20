@@ -11,25 +11,28 @@ def main():
     with open('./afin-team-configuration.yaml', 'r') as file:
         setup = yaml.safe_load(file)
         cfg: Config = Config.parse_obj(os.environ)
+        cfg.MERGE_REQUEST_URL = f"{cfg.CI_SERVER_URL}/{cfg.MERGE_REQUEST_PROJECT_PATH}/-/merge_requests/{cfg.MERGE_REQUEST_IID}"
 
         mrg = MrGit(cfg)
         mr = mrg.get_mr()
         if mr:
             try:
-                excl_project = setup["projects"]["exclude"]
+                exclude_project_option = setup["projects"]["exclude"]
             except KeyError:
-                excl_project = None
+                exclude_project_option = None
 
-            if excl_project is None or cfg.MERGE_REQUEST_PROJECT_PATH not in excl_project:
+            if exclude_project_option is None or cfg.MERGE_REQUEST_PROJECT_PATH not in exclude_project_option:
                 if "NoCodeReview" not in cfg.MERGE_REQUEST_LABELS.split(','):
                     team = Team(setup, cfg)
                     username = team.get_user_name_by_id(cfg.PIPE_GITLAB_USER_ID)
-                    rand_reviewer = team.get_random_reviewer_by_team(team.get_team_by_user(username), username)
-                    reviewer: User = team.get_user_by_name(rand_reviewer)
+                    user_team = team.get_team_by_user(username)
+                    rand_reviewer_username = team.get_random_reviewer_by_team(user_team, username)
+                    reviewer: User = team.get_user_by_name(rand_reviewer_username)
                     log.info(f"Для MR {cfg.MERGE_REQUEST_IID} выбран ревьювер {reviewer.name}")
-                    mrg.setup_mr_setting(reviewer, rand_reviewer)
+                    mrg.setup_mr_setting(reviewer, rand_reviewer_username)
                 else:
                     log.warning("Задана метка NoCodeReview. Ревью не будет назначено!")
+                    # todo: сообщить лиду в mattermost
             else:
                 log.warning(f"Проект {cfg.MERGE_REQUEST_PROJECT_PATH} в списке исключений. Ревью не будет назначено!")
         else:

@@ -1,3 +1,4 @@
+from dataclasses import Field
 from typing import Optional
 
 from pydantic import BaseModel
@@ -24,4 +25,14 @@ class Config(BaseModel):
     PIPE_GITLAB_USER_ID: int
     MERGE_REQUEST_TARGET_BRANCH_NAME: str
     MERGE_REQUEST_SOURCE_BRANCH_NAME: str
+    MERGE_REQUEST_URL: Optional[str]
 
+
+class MrDiff(BaseModel):
+    diff: str
+    new_path: str
+    diff_size: Optional[int]
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.diff_size = len(self.diff)
