@@ -13,23 +13,15 @@ class User(BaseModel):
     web_url: Optional[str]
 
 
-# - echo ${PIPE_GITLAB_USER_ID}
-#       - echo ${MERGE_REQUEST_ID}
-#       - echo ${MERGE_REQUEST_IID}
-#       - echo ${MERGE_REQUEST_PROJECT_PATH}
-#       - echo ${MERGE_REQUEST_PROJECT_ID}
-#       - echo ${MERGE_REQUEST_LABELS}
-#       - echo ${CI_PIPELINE_SOURCE}
-#       - echo ${MERGE_REQUEST_TARGET_BRANCH_NAME}
-#       - echo ${PIPELINE_JOB}
-
-
 class Config(BaseModel):
     GITLAB_TOKEN: str
     CI_SERVER_URL: str
-    MERGE_REQUEST_IID: Optional[str]
-    MERGE_REQUEST_PROJECT_PATH: Optional[str]
+    MERGE_REQUEST_IID: int
+    MERGE_REQUEST_PROJECT_PATH: str
+    MERGE_REQUEST_PROJECT_URL: str
+    MERGE_REQUEST_PROJECT_ID: int
     MERGE_REQUEST_LABELS: Optional[str]
-    PIPE_GITLAB_USER_ID: Optional[str]
-    MERGE_REQUEST_IID: Optional[str]
-    MERGE_REQUEST_PROJECT_URL: Optional[str]
+    PIPE_GITLAB_USER_ID: int
+    MERGE_REQUEST_TARGET_BRANCH_NAME: str
+    MERGE_REQUEST_SOURCE_BRANCH_NAME: str
+

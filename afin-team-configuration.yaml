@@ -11,19 +11,21 @@ teams:
             - a.obedin
             - a.moiseichev
             - a.solovyeva
+            - artemov
     - blue:
         lead: a.obedin
         members:
             - reznichenko
             - a.solovyeva
-            - mesniankin2
+            - mesniankin
         reviewers:
             - reznichenko
             - a.obedin
             - artemov
             
-# projects:
-#     exclude:
-#         - devops
+projects:
+    exclude:
+        - farzoom/common/common-api-pi-proxy4
+        - farzoom/common/common-api-pi-proxy2
 
 

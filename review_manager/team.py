@@ -2,6 +2,7 @@ from typing import Union
 import gitlab
 from .schema import User
 from loguru import logger as log
+import random
 
 
 class Team:
@@ -23,11 +24,46 @@ class Team:
             except KeyError:
                 return None
 
-    def get_reviewers_by_team(self, team: str):
+    def get_user_name_by_id(self, id: int):
+        if id:
+            for key, value in self._users.items():
+                if value.id == id:
+                    return key
+                return None
+        else:
+            return None
+
+    def get_user_by_name(self, name: str) -> [User, None]:
+        if name.strip():
+            try:
+                user = self._users[name]
+                return user
+            except KeyError:
+                return None
+
+    def get_team_by_user(self, name: str) -> [str, None]:
+        if name.strip():
+            try:
+                team = self._users[name].team
+                return team
+            except KeyError:
+                return None
+
+    def get_reviewers_by_team(self, team: str) -> [int, None]:
         if team.strip():
             try:
                 id = self._reviewers[team]
                 return id
+            except KeyError:
+                return None
+
+    def get_random_reviewer_by_team(self, team: str, cur_user: str) -> [str, None]:
+        if team.strip() and cur_user.strip():
+            try:
+                reviewer = cur_user.strip()
+                while reviewer.strip() == cur_user.strip():
+                    reviewer = random.choice(self._reviewers[team])
+                return reviewer
             except KeyError:
                 return None
 

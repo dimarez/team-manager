@@ -4,3 +4,4 @@ main.py
 setup_code_reviev.py
 .idea
 *__pycache__*
+.env
