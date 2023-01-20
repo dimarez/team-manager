@@ -28,8 +28,8 @@ setup-review:
       - set
       #- python app.py
       - ls
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "pipeline" && $PIPELINE_JOB == "setup-code-review"
+  # rules:
+  #   - if: $CI_PIPELINE_SOURCE == "pipeline" && $PIPELINE_JOB == "setup-code-review"
   allow_failure: false
 
 
