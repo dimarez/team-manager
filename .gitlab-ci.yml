@@ -7,7 +7,7 @@ stages:
 
 setup-review:       
   stage: setup-review
-  image: "${HARBOR_URL}/devops/python:latest"
+  image: "${HARBOR_URL}/devops/ab-python"
   script:
       - echo "============================"
       - echo ${MERGE_REQUEST_ID}
@@ -22,6 +22,7 @@ setup-review:
       - echo ${GITLAB_TOKEN}
       - echo $API_V4_URL
       - echo $MERGE_REQUEST_PROJECT_URL
+      - echo $PIPE_GITLAB_USER_ID
       - echo "============================"
       - pip list
       - python app.py
