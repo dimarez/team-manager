@@ -6,13 +6,8 @@ from .schema import Config, User
 from .team import Team
 from .gl import MrGit
 
-def main():
 
-    # # mr.assignee_ids = [3]
-    # # mr.reviewer_ids = [3]
-    # # mr.discussion_locked = True
-    # # mr.discussions.create({'body': 'Старт процесса Code Review v2'})
-    # # mr.save()
+def main():
     with open('./afin-team-configuration.yaml', 'r') as file:
         setup = yaml.safe_load(file)
         cfg: Config = Config.parse_obj(os.environ)
@@ -33,8 +28,6 @@ def main():
                     reviewer: User = team.get_user_by_name(rand_reviewer)
                     log.info(f"Для MR {cfg.MERGE_REQUEST_IID} выбран ревьювер {reviewer.name}")
                     mrg.setup_mr_setting(reviewer, rand_reviewer)
-
-
                 else:
                     log.warning("Задана метка NoCodeReview. Ревью не будет назначено!")
             else:

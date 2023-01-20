@@ -100,12 +100,11 @@ def gitlab_get_user_data(username: str, link: gitlab.client.Gitlab, team: str, l
     user = link.users.list(username=username.strip())
     if user and user[0].state == "active":
         U = user[0]
-        email = U.emails.list()
         udata = User(id=U.id,
                      name=U.name,
                      avatar_url=U.avatar_url,
                      web_url=U.web_url,
-                     email=email[0].email,
+                     email=U.email,
                      lead=lead,
                      team=team)
         return udata
