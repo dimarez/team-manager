@@ -28,7 +28,7 @@ projects:
         - farzoom/configs/afinance
     # Перечень проектов, исключены из code-review
     exclude:
-        - farzoom/common/common-api-pi-proxy4
+        - farzoom/common/common-api-pi-proxy
         - farzoom/common/common-api-pi-proxy2
     # Список файлов и расширений, изменения в которых будут игнорироваться
     skip:
