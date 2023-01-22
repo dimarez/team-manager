@@ -34,7 +34,7 @@ projects:
     # Список файлов и расширений, изменения в которых будут игнорироваться
     skip:
         extensions:
-        - bpmn
+        - bpmn1
         - dmn
         files:
         - .gitlab-ci.yml
