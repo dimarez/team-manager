@@ -65,7 +65,6 @@ class Git:
 
     def check_project_exceptions(self, project) -> bool:
         try:
-            # exclude_project_option = self.proj_conf["exclude"]
             exclude_project_option = self.config["projects"]["exclude"]
         except KeyError:
             exclude_project_option = None
@@ -79,7 +78,7 @@ class Git:
         try:
             project: gitlab.v4.objects.projects.Project = self.gl.projects.get(project_id, lazy=False)
             mr: ProjectMergeRequest = project.mergerequests.get(mr_id)
-            if mr:
+            if mr and mr.state != "closed":
                 return mr, project
             else:
                 return None, None
