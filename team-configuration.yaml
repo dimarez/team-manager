@@ -5,7 +5,7 @@ teams:
             - reznichenko
             - a.moiseichev  
             - artemov
-            #- archakov
+            - archakov
         
         reviewers:
             - reznichenko
