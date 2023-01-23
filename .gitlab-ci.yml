@@ -1,33 +1,17 @@
 default:
   tags:
-  - docker-yc
+    - docker-yc
 
-stages:          
+stages:
   - setup-review
 
-setup-review:       
+setup-review:
   stage: setup-review
   image: "${HARBOR_URL}/devops/ab-python"
   script:
-      - echo "============================"
-      - echo ${MERGE_REQUEST_ID}
-      - echo ${MERGE_REQUEST_IID}
-      - echo ${MERGE_REQUEST_PROJECT_PATH}
-      - echo ${MERGE_REQUEST_PROJECT_ID}    
-      - echo ${MERGE_REQUEST_LABELS}
-      - echo ${CI_PIPELINE_SOURCE}
-      - echo ${MERGE_REQUEST_TARGET_BRANCH_NAME}
-      - echo ${MERGE_REQUEST_SOURCE_BRANCH_NAME}
-      - echo ${PIPELINE_JOB}
-      - echo ${GITLAB_TOKEN}
-      - echo $API_V4_URL
-      - echo $MERGE_REQUEST_PROJECT_URL
-      - echo $PIPE_GITLAB_USER_ID
-      - echo "============================"
-      - pip list
-      - set
-      #- python app.py
-      - ls
+    - pip list
+    #- python main.py
+    - ls
   # rules:
   #   - if: $CI_PIPELINE_SOURCE == "pipeline" && $PIPELINE_JOB == "setup-code-review"
   allow_failure: false

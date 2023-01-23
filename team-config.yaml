@@ -1,0 +1,42 @@
+teams:
+  - green:
+      lead: a.obedin
+      members:
+        - reznichenko
+        - a.moiseichev
+        - artemov
+      reviewers:
+        - reznichenko
+        - a.obedin
+        - a.moiseichev
+        - a.solovyeva
+        - artemov
+  - blue:
+      lead: a.obedin
+      members:
+        - reznichenko
+        - a.solovyeva
+        - mesniankin
+      reviewers:
+        - reznichenko
+        - a.obedin
+        - artemov
+
+projects:
+  # Перечень проектов, которые попадаю в code-review при любых изменениях
+  always:
+    - farzoom/configs/afinance
+  # Перечень проектов, исключены из code-review
+  exclude:
+    - farzoom/common/common-api-pi-proxy4
+    - farzoom/common/common-api-pi-proxy2
+  # Список файлов и расширений, изменения в которых будут игнорироваться
+  skip:
+    extensions:
+      - bpmn
+      - dmn
+    files:
+      - .gitlab-ci.yml
+
+
+

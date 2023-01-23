@@ -1,0 +1,40 @@
+teams:
+  - team1:
+      lead: user1
+      members:
+        - user1
+        - user2
+        - user3
+      reviewers:
+        - user1
+        - user2
+        - user6
+  - team2:
+        lead: user1
+        members:
+          - user5
+          - user6
+          - user7
+        reviewers:
+          - user1
+          - user2
+          - user6
+          - user7
+projects:
+  # Перечень проектов, которые попадаю в code-review при любых изменениях
+  always:
+    - farzoom/configs/afinance
+  # Перечень проектов, исключены из code-review
+  exclude:
+    - farzoom/common/common-api-pi-proxy
+    - farzoom/common/common-api-pi-proxy
+  # Список файлов и расширений, изменения в которых будут игнорироваться
+  skip:
+    extensions:
+      - bpmn
+      - dmn
+    files:
+      - .gitlab-ci.yml
+
+
+
