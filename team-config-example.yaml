@@ -10,16 +10,16 @@ teams:
         - user2
         - user6
   - team2:
-        lead: user1
-        members:
-          - user5
-          - user6
-          - user7
-        reviewers:
-          - user1
-          - user2
-          - user6
-          - user7
+      lead: user1
+      members:
+        - user5
+        - user6
+        - user7
+      reviewers:
+        - user1
+        - user2
+        - user6
+        - user7
 projects:
   # Перечень проектов, которые попадаю в code-review при любых изменениях
   always:

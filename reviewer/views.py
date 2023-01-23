@@ -19,7 +19,7 @@ async def index(mr_id: int = Query(default=Required), project_id: int = Query(de
                 git_service: GitService = Depends(get_git_service),
                 ABToken: str | None = Header(default=None)):
     if ABToken != init_config.SERVER_TOKEN:
-        log.error("Ошибка авторизации!")
+        log.error("Ошибка авторизации!")  
         raise HTTPException(status_code=401, detail="Unauthorized")
     else:
         log.debug(f"Запрос на настрйоку код-ревью для MR {mr_id}, project {project_id}")

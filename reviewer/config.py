@@ -21,7 +21,7 @@ class InitConfig(BaseModel):
     MM_URL: str
     MM_PORT: int = 443
     TEAM_CONFIG_PROJECT: str
-    TEAM_CONFIG_FILE: str = "team-config-example.yaml"
+    TEAM_CONFIG_FILE: str = "team-config.yaml"
     LOG_LEVEL: LogLevel = LogLevel.INFO
     SERVER_TOKEN: str
     SERVER_ADDRESS: str = "0.0.0.0"

@@ -41,6 +41,8 @@ class Git:
                 config_decoded = base64.b64decode(config_encoded).decode()
                 self.config = yaml.safe_load(config_decoded)
                 self._config_sha256 = _config_sha256
+                log.info("Конфигурация успешно загружена")
+                log.debug(self.config)
                 return True
             else:
                 return False
@@ -63,7 +65,7 @@ class Git:
 
     def check_project_exceptions(self, project) -> bool:
         try:
-            #exclude_project_option = self.proj_conf["exclude"]
+            # exclude_project_option = self.proj_conf["exclude"]
             exclude_project_option = self.config["projects"]["exclude"]
         except KeyError:
             exclude_project_option = None

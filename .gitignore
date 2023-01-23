@@ -3,5 +3,5 @@ poetry.lock
 .idea
 *__pycache__*
 /.fleet/
-
 /*.env
+/reviewer/bot/mattermost.py

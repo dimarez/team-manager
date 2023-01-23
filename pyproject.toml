@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "team-manager"
-version = "0.5.0"
+version = "0.8.0"
 description = "Сервис автоматического управления code-review"
 authors = ["Dmitriy Reznichenko <drezn@a-fin.tech>"]
 readme = "README.md"
@@ -13,11 +13,13 @@ pydantic = "^1.10.4"
 python-gitlab = "^3.12.0"
 loguru = "^0.6.0"
 mattermostdriver = "^7.3.2"
-markdown = "^3.4.1"
 fastapi = "^0.89.1"
 uvicorn = { extras = ["standard"], version = "^0.20.0" }
 fastapi-utils = "^0.2.1"
 
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core"]

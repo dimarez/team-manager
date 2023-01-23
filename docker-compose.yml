@@ -1,0 +1,15 @@
+version: '3'
+services:
+  team-manager:
+    image: "team-manager:latest"
+    env_file: ./.env
+    ports:
+    - target: ${server_port}
+      published: ${server_port}
+      protocol: tcp
+      mode: host
+    build:
+      context: .
+      dockerfile: ./Dockerfile      
+
+    
