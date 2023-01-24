@@ -17,7 +17,7 @@ class Git:
     init_cfg: InitConfig
     gl: gitlab.client.Gitlab
     config: dict
-    _config_sha256: str = None
+    _config_sha256: str = ""
 
     def __init__(self, init_cfg: InitConfig):
         self.cfg = init_cfg
@@ -96,10 +96,7 @@ class Git:
     def set_mr_review_setting(self, reviewer: User, mr: ProjectMergeRequest) -> bool:
         mr.assignee_ids = [reviewer.id]
         mr.reviewer_ids = [reviewer.id]
-        # mr.assignee_ids = [3]
-        # mr.reviewer_ids = [3]
         mr.discussion_locked = True
-
         text = f"""Привет @{mr.author["username"]}!
 
 Данный [MR]({mr.web_url}) был выбран для проведения **обязательного** ревью. Надеюсь, ты так же рад(а), как и мы!

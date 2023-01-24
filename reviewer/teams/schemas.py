@@ -1,12 +1,12 @@
 from typing import Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, Extra, EmailStr
 
 
 class GitUser(BaseModel):
     id: int
     name: Optional[str]
-    email: str
+    email: EmailStr
     avatar_url: Optional[str]
     web_url: Optional[str]
 
