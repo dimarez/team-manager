@@ -4,7 +4,7 @@ from enum import Enum
 from typing import Optional
 
 from loguru import logger as log
-from pydantic import BaseModel, ValidationError, root_validator, HttpUrl
+from pydantic import BaseModel, ValidationError, root_validator, HttpUrl, EmailStr
 
 
 class LogLevel(str, Enum):
@@ -32,6 +32,8 @@ class InitConfig(BaseModel):
     TEAM_CONFIG_UPDATE_INTERVAL: int = 60
     SENTRY_DSN: Optional[HttpUrl]
     SENTRY_TRACES_SAMPLE_RATE: float = 1.0
+    DEBUG_REVIEWER_ID: Optional[int]
+    DEBUG_REVIEWER_EMAIL: Optional[EmailStr]
 
     @root_validator(pre=True)
     def to_uppercase(cls, values: dict):

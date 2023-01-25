@@ -1,9 +1,6 @@
-from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, HttpUrl
-
-from reviewer.teams.schemas import User
 
 
 class Config(BaseModel):

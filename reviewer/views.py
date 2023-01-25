@@ -3,6 +3,7 @@ from gitlab.v4.objects import ProjectMergeRequest
 from gitlab.v4.objects.projects import Project
 from loguru import logger as log
 from pydantic import Required
+from starlette import status
 
 from .app import init_config, msg_queue
 from .app_services import get_team_service, get_git_service
@@ -11,6 +12,11 @@ from .services import TeamService, GitService
 from .teams.schemas import User
 
 api_router = APIRouter()
+
+
+@api_router.get('/health', status_code=status.HTTP_200_OK)
+def perform_healthcheck():
+    return {'healthcheck': 'Everything OK!'}
 
 
 @api_router.get('/review')
@@ -53,7 +59,9 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
         raise HTTPException(status_code=204, detail="Pass")
 
     log.info(f"Для MR [{mr_ref}] выбран ревьювер {reviewer}")
-    set_mr_setting_result = git_service.set_mr_review_setting(reviewer, team_service.get_user_by_name(mr.author['username']), mr, project, diffs)
+    set_mr_setting_result = git_service.set_mr_review_setting(reviewer,
+                                                              team_service.get_user_by_name(mr.author['username']), mr,
+                                                              project, diffs)
     if not set_mr_setting_result:
         log.error("Ошибка сохранения значений для MR")
         raise HTTPException(status_code=500, detail="Ошибка сохранения значений для MR")
@@ -62,8 +70,3 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
     msg_queue.put(set_mr_setting_result)
     mr_answer = MrSetupAnswer.parse_obj(set_mr_setting_result)
     return mr_answer
-
-
-
-
-

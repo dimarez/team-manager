@@ -4,20 +4,22 @@ from mattermostdriver.exceptions import NoAccessTokenProvided, ResourceNotFound,
 from requests.exceptions import ConnectionError
 
 from reviewer.config import InitConfig
+from reviewer.teams.schemas import MrCrResultData
 from reviewer.utilites import render_template
 from .schemas import Config, MessageCodeReviewNotice, \
     MessageCodeReviewNoticeField, MessageCodeReviewNoticeAttachment
-from reviewer.teams.schemas import MrCrResultData
 
 
 class Bot:
     _cfg: Config
     _link: Driver
     _bot_id: str
+    _init_cfg: InitConfig
 
     def __init__(self, init_cfg: InitConfig):
         self._cfg = Config(url=init_cfg.MM_HOST, token=init_cfg.MM_TOKEN)
         self._link = Driver(self._cfg.dict())
+        self._init_cfg = init_cfg
         self._connect()
 
     def _connect(self) -> dict | None:
@@ -73,10 +75,11 @@ class Bot:
 
     def send_mr_notice_message(self, queue_mr_result: MrCrResultData) -> dict | None:
         try:
-            #todo Отключить!!
-
-            # user = self._link.users.get_user_by_email(queue_mr_result.mr_reviewer.email)
-            user = self._link.users.get_user_by_email('drezn@a-fin.tech')
+            if self._init_cfg.DEBUG_REVIEWER_EMAIL:
+                user_email = self._init_cfg.DEBUG_REVIEWER_EMAIL
+            else:
+                user_email = queue_mr_result.mr_reviewer.email
+            user = self._link.users.get_user_by_email(user_email)
             if user:
                 user_id = user["id"]
                 channel_id = self._create_channel(user_id)

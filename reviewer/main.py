@@ -1,5 +1,4 @@
 import logging
-import sys
 
 import uvicorn
 from loguru import logger as log

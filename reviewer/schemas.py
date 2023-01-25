@@ -1,6 +1,7 @@
 import datetime
+from typing import Optional
 
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, EmailStr
 
 from reviewer.teams.schemas import User
 
@@ -15,3 +16,5 @@ class MrSetupAnswer(BaseModel):
     project_name: str
     web_url: HttpUrl
     timestamp: datetime.datetime = datetime.datetime.now()
+    DEBUG_REVIEWER_ID: Optional[int]
+    DEBUG_REVIEWER_EMAIL: Optional[EmailStr]

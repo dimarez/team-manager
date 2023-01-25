@@ -7,7 +7,6 @@ from fastapi_utils.tasks import repeat_every
 from loguru import logger as log
 
 from .bot import Bot
-
 from .config import init_environment
 from .teams import Git, Team
 
@@ -17,9 +16,8 @@ msg_queue = Queue()
 msg_error_queue = Queue()
 
 log.remove()
-log.add(sys.stderr, format="{time} {level} {message}", level=logging.getLevelName(init_config.LOG_LEVEL))
+log.add(sys.stderr, level=logging.getLevelName(init_config.LOG_LEVEL))
 log.info(f"Уровень логирования выставлен на {init_config.LOG_LEVEL}")
-
 
 if init_config:
 

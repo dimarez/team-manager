@@ -20,6 +20,7 @@ class Team:
         if is_upd:
             self._load_team_setup()
 
+    # todo: Прорефакторить парсинг конфига
     def _load_team_setup(self):
         team_setup = self.git.config
         users: {str: User} = {}
@@ -86,9 +87,14 @@ class Team:
     def _get_random_reviewer_by_team(self, team: str, cur_user: str) -> User | None:
         if team.strip() and cur_user.strip():
             try:
+                i = 0
                 reviewer = cur_user.strip()
                 while reviewer.strip() == cur_user.strip():
                     reviewer = random.choice(self._reviewers[team])
+                    i += 1
+                    if i == 10:
+                        log.error("Невозможно выбрать ревьювера. Нет доступных разработчиков")
+                        return None
                 return self._users[reviewer]
             except KeyError:
                 return None
