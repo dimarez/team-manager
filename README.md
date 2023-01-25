@@ -7,10 +7,42 @@
 
 Пример запроса:
 ```http request
-   ### Expect { message: 'Wellcome to TestsAPI'}
-   GET http://api.dev.a-fin.tech/tm/review?project_id={ID проекта в Gitlab}&mr_id={ID мердж-реквеста в контексте проекта}
+# Токен авторизации передается через Header **abtoken**
+GET http://api.dev.a-fin.tech/tm/review?project_id={ID проекта в Gitlab}&mr_id={ID мердж-реквеста в контексте проекта}
 ```
-Токен авторизации передается через Header **abtoken**
+
+Пример ответа:
+```json
+{
+    "mr_id": 62,
+    "mr_author": {
+        "id": 3,
+        "name": "Дмитрий Резниченко",
+        "email": "drezn@a-fin.tech",
+        "avatar_url": "https://git.a-fin.tech/uploads/-/system/user/avatar/3/avatar.png",
+        "web_url": "https://git.a-fin.tech/reznichenko",
+        "team": "green",
+        "lead": "a.obedin",
+        "username": "reznichenko"
+    },
+    "mr_reviewer": {
+        "id": 43,
+        "name": "Сергей Артемов",
+        "email": "artemov@farzoom.com",
+        "avatar_url": "https://secure.gravatar.com/avatar/276d57790f119eaad1b2e9106c756105?s=80&d=identicon",
+        "web_url": "https://git.a-fin.tech/artemov",
+        "team": "green",
+        "lead": "a.obedin",
+        "username": "artemov"
+    },
+    "created_at": "2023-01-25T16:46:51.364000+03:00",
+    "updated_at": "2023-01-25T18:01:09.077000+03:00",
+    "project_id": 408,
+    "project_name": "farzoom/common/common-api-pi-proxy!62",
+    "web_url": "https://git.a-fin.tech/farzoom/common/common-api-pi-proxy",
+    "timestamp": "2023-01-25T17:54:09.158969"
+}
+```
 
 
 ### Конфигурация сервиса (ENV)
