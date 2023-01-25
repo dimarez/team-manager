@@ -1,6 +1,7 @@
 import os
 import sys
 from enum import Enum
+from typing import Optional
 
 from loguru import logger as log
 from pydantic import BaseModel, ValidationError, root_validator, HttpUrl
@@ -28,6 +29,8 @@ class InitConfig(BaseModel):
     SERVER_ADDRESS: str = "0.0.0.0"
     SERVER_PORT: int = 8080
     TEAM_CONFIG_UPDATE_INTERVAL: int = 60
+    SENTRY_DSN: Optional[HttpUrl]
+    SENTRY_TRACES_SAMPLE_RATE: float = 1.0
 
     @root_validator(pre=True)
     def to_uppercase(cls, values: dict):

@@ -6,4 +6,4 @@ poetry.lock
 /*.env
 /reviewer/bot/mattermost.py
 project.json
-merge_req.json
+/merge_req.json

@@ -22,6 +22,14 @@ log.info(f"Уровень логирования выставлен на {init_c
 
 
 if init_config:
+
+    if init_config.SENTRY_DSN:
+        import sentry_sdk
+
+        sentry_sdk.init(
+            dsn=init_config.SENTRY_DSN,
+            traces_sample_rate=init_config.SENTRY_TRACES_SAMPLE_RATE,
+        )
     bot = Bot(init_config)
 
     git = Git(init_config)

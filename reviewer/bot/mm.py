@@ -58,7 +58,6 @@ class Bot:
             user = self._link.users.get_user_by_email(email=email)
             if user:
                 user_id = user["id"]
-                user_login = user["username"]
                 channel_id = self._create_channel(user_id)
                 if channel_id:
                     return self._link.posts.create_post({"channel_id": channel_id,
