@@ -16,5 +16,3 @@ class MrSetupAnswer(BaseModel):
     project_name: str
     web_url: HttpUrl
     timestamp: datetime.datetime = datetime.datetime.now()
-    DEBUG_REVIEWER_ID: Optional[int]
-    DEBUG_REVIEWER_EMAIL: Optional[EmailStr]
