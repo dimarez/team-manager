@@ -1,8 +1,11 @@
-# Сервис управления процессом code-review
+## Сервис управления процессом code-review
 
-Заглушка
+Сервис автоматического назначения и контроля за проведением Code-Review.
+Ответственный разработчик назначается случайно в соответствии с конфигурацией команды.
 
-## Конфигурация сервиса (ENV)
+Соответствующие уведомления отправляются в чат команды платформы Mattermost
+
+### Конфигурация сервиса (ENV)
 
     Обязательные:
     GITLAB_TOKEN=(token)
@@ -23,4 +26,43 @@
     SERVER_PORT=8080 (default: 8080)
     TEAM_CONFIG_UPDATE_INTERVAL=60 (default: 60)
     SENTRY_DSN=(dsn) (default: Null)
-    SENTRY_TRACES_SAMPLE_RATE=1.0 (default: 1.0) 
+    SENTRY_TRACES_SAMPLE_RATE=1.0 (default: 1.0)
+
+### Пример конфигурации команд (team-config.yaml):
+
+    teams:
+      - team1:
+          lead: user1
+          members:
+            - user1
+            - user2
+            - user3
+          reviewers:
+            - user1
+            - user2
+            - user6
+        - team2:
+            lead: user1
+            members:
+              - user5
+              - user6
+              - user7
+            reviewers:
+              - user1
+              - user2
+              - user6
+              - user7
+    projects:
+      # Перечень проектов, которые попадаю в code-review при любых изменениях
+      always:
+        - farzoom/configs/afinance
+      # Перечень проектов, исключены из code-review
+      exclude:
+        - farzoom/common/common-api-pi-proxy
+      # Список файлов и расширений, изменения в которых будут игнорироваться
+      skip:
+        extensions:
+          - bpmn
+          - dmn
+        files:
+          - .gitlab-ci.yml

@@ -1,7 +1,7 @@
 version: '3'
 services:
   team-manager:
-    image: "team-manager:latest"
+    image: "team-manager"
     env_file: ./.env
     ports:
     - target: ${server_port}

@@ -27,7 +27,6 @@ projects:
   # Перечень проектов, исключены из code-review
   exclude:
     - farzoom/common/common-api-pi-proxy
-    - farzoom/common/common-api-pi-proxy
   # Список файлов и расширений, изменения в которых будут игнорироваться
   skip:
     extensions:
