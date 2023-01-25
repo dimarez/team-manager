@@ -4,4 +4,4 @@ poetry.lock
 *__pycache__*
 /.fleet/
 /*.env
-/k9s/
+/k9s/*
