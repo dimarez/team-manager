@@ -1,7 +1,7 @@
 ## Сервис управления процессом code-review
 
 Сервис автоматического назначения и контроля за проведением Code-Review.
-Ответственный разработчик назначается случайно в соответствии с конфигурацией команды.
+Ответственный разработчик назначается случайно из пула доступных для команды reviewers в соответствии с конфигурацией команды.
 
 Соответствующие уведомления отправляются в чат команды платформы Mattermost
 
@@ -46,8 +46,8 @@ GET http://api.dev.a-fin.tech/tm/review?project_id={ID проекта в Gitlab}
 
 
 ### Конфигурация сервиса (ENV)
-```ini
-    Обязательные:
+```dotenv
+    # Обязательные:
     GITLAB_TOKEN=(token)
     GITLAB_URL=https://git.a-fin.tech
     MM_HOST=mm.a-fin.tech
@@ -56,7 +56,7 @@ GET http://api.dev.a-fin.tech/tm/review?project_id={ID проекта в Gitlab}
     SERVER_TOKEN=(token) 
     TEAM_CONFIG_PROJECT=farzoom/configs/team-config
 
-    Опциональные:
+    # Опциональные:
     MM_PORT=443 (default: 443)
     MM_BOT_MSG_INTERVAL=30 (default: 30)
     TEAM_CONFIG_FILE=team-config.yaml (default: team-config.yaml)
