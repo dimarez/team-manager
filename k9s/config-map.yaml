@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: team-manager-config
+  namespace: afin-services
+data:
+  GITLAB_URL: "https://git.a-fin.tech"
+  MM_HOST: "mm.a-fin.tech"
+  MM_BOT_MSG_INTERVAL: "30"
+  TEAM_CONFIG_PROJECT: "farzoom/configs/team-config"
+  DEBUG_REVIEWER_ID: "3"
+  DEBUG_REVIEWER_EMAIL: "drezn@a-fin.tech"
+
+
+

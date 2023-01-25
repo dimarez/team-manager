@@ -1,17 +1,18 @@
 import datetime
+from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl, EmailStr
 
 from reviewer.teams.schemas import User
 
 
 class MrSetupAnswer(BaseModel):
     mr_id: int
-    author: User
+    mr_author: User
+    mr_reviewer: User
     created_at: datetime.datetime
     updated_at: datetime.datetime
     project_id: int
     project_name: str
-    web_url: str
-    reviewer: User
+    web_url: HttpUrl
     timestamp: datetime.datetime = datetime.datetime.now()

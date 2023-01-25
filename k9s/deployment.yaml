@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: team-manager
+  labels:
+    app: team-manager
+spec:
+  selector:
+    matchLabels:
+      app: team-manager
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: team-manager
+    spec:
+      containers:
+      - name: team-manager
+        image: registry.dev.a-fin.tech/devops/team-manager:0.5.4
+        resources:
+          limits:
+            cpu: "0.5"
+            memory: 256Mi
+          requests:
+            cpu: 500m
+            memory: 256Mi
+        envFrom:
+            - configMapRef:
+                name: team-manager-config
+            - secretRef:
+                name: team-manager-secret
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          failureThreshold: 1
+          periodSeconds: 10
+        startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 30
+            periodSeconds: 10
+      imagePullSecrets:
+        - name: regcred-afin
