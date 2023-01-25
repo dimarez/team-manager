@@ -24,6 +24,7 @@ class InitConfig(BaseModel):
     MM_BOT_MSG_INTERVAL: int = 30
     TEAM_CONFIG_PROJECT: str
     TEAM_CONFIG_FILE: str = "team-config.yaml"
+    TEAM_CONFIG_BRANCH: str = "master"
     LOG_LEVEL: LogLevel = LogLevel.INFO
     SERVER_TOKEN: str
     SERVER_ADDRESS: str = "0.0.0.0"

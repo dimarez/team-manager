@@ -33,11 +33,11 @@ class Git:
     def load_config(self) -> bool:
         project = self.gl.projects.get(self.cfg.TEAM_CONFIG_PROJECT)
         try:
-            _config_sha256 = project.files.get(file_path=self.cfg.TEAM_CONFIG_FILE, ref="master").content_sha256
+            _config_sha256 = project.files.get(file_path=self.cfg.TEAM_CONFIG_FILE, ref=self.cfg.TEAM_CONFIG_BRANCH).content_sha256
             if _config_sha256 != self._config_sha256:
                 if self._config_sha256:
                     log.warning("Обнаружена свежая версия конфига. Загружаем!")
-                config_encoded = project.files.get(file_path=self.cfg.TEAM_CONFIG_FILE, ref="master").content
+                config_encoded = project.files.get(file_path=self.cfg.TEAM_CONFIG_FILE, ref=self.cfg.TEAM_CONFIG_BRANCH).content
                 config_decoded = base64.b64decode(config_encoded).decode()
                 self.config = yaml.safe_load(config_decoded)
                 self._config_sha256 = _config_sha256
