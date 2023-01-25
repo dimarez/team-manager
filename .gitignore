@@ -4,6 +4,4 @@ poetry.lock
 *__pycache__*
 /.fleet/
 /*.env
-/reviewer/bot/mattermost.py
-project.json
-/merge_req.json
+/k9s/
