@@ -83,14 +83,6 @@ class Team:
             except KeyError:
                 return None
 
-    # def get_reviewers_by_team(self, team: str) -> (int, None):
-    #     if team.strip():
-    #         try:
-    #             id = self._reviewers[team]
-    #             return id
-    #         except KeyError:
-    #             return None
-
     def _get_random_reviewer_by_team(self, team: str, cur_user: str) -> User | None:
         if team.strip() and cur_user.strip():
             try:

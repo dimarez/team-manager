@@ -5,3 +5,5 @@ poetry.lock
 /.fleet/
 /*.env
 /reviewer/bot/mattermost.py
+project.json
+merge_req.json

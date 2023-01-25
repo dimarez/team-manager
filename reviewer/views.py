@@ -23,7 +23,6 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
         raise HTTPException(status_code=401, detail="Unauthorized")
     log.info(f"Получен запрос на настройку код-ревью для MR {mr_id}, project {project_id}")
 
-    # todo: перенести бизнес-логику в сервис (загрузка инфы о проекте и MR)
     mr: ProjectMergeRequest
     project: Project
     mr, project = git_service.get_mr(mr_id=mr_id, project_id=project_id)
@@ -49,29 +48,22 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
         raise HTTPException(status_code=204, detail="Pass")
 
     log.debug(f"По запрошенному MR с учетом фильтров найдено {diffs.count()} изменений")
-    # todo: перенести логику в сервис (выбор ревьювера)
     reviewer: User = team_service.get_random_reviewer_for_user(mr.author["username"])
     if not reviewer:
         raise HTTPException(status_code=204, detail="Pass")
 
     log.info(f"Для MR [{mr_ref}] выбран ревьювер {reviewer}")
-
-    if git_service.set_mr_review_setting(reviewer, mr):
-        mr_answer = MrSetupAnswer(mr_id=mr_id,
-                                  author=team_service.get_user_by_name(mr.author['username']),
-                                  created_at=mr.created_at,
-                                  updated_at=mr.updated_at,
-                                  project_id=project_id,
-                                  project_name=project.path_with_namespace,
-                                  web_url=project.web_url,
-                                  reviewer=reviewer)
-
-        # todo: Реализовать запись метаданных эвента в очередь
-        msg_queue.put(mr_answer)
-        log.debug(mr_answer)
-        return mr_answer.dict()
-    else:
+    set_mr_setting_result = git_service.set_mr_review_setting(reviewer, team_service.get_user_by_name(mr.author['username']), mr, project, diffs)
+    if not set_mr_setting_result:
+        log.error("Ошибка сохранения значений для MR")
         raise HTTPException(status_code=500, detail="Ошибка сохранения значений для MR")
+
+    log.debug(f"Result -> {set_mr_setting_result}")
+    msg_queue.put(set_mr_setting_result)
+    mr_answer = MrSetupAnswer.parse_obj(set_mr_setting_result)
+    return mr_answer
+
+
 
 
 

@@ -6,7 +6,8 @@ from requests.exceptions import ConnectionError
 from reviewer.config import InitConfig
 from reviewer.utilites import render_template
 from .schemas import Config, MessageCodeReviewNotice, \
-    MessageCodeReviewNoticeField, MsgTest
+    MessageCodeReviewNoticeField, MessageCodeReviewNoticeAttachment
+from reviewer.teams.schemas import MrCrResultData
 
 
 class Bot:
@@ -17,6 +18,7 @@ class Bot:
     def __init__(self, init_cfg: InitConfig):
         self._cfg = Config(url=init_cfg.MM_HOST, token=init_cfg.MM_TOKEN)
         self._link = Driver(self._cfg.dict())
+        self._connect()
 
     def _connect(self) -> dict | None:
         try:
@@ -32,7 +34,7 @@ class Bot:
             log.error(f"Ошибка авторизации в Mattermost -> [{ex}]")
             return None
 
-    def find_user_by_email(self, email: str) -> dict | None:
+    def get_user_by_email(self, email: str) -> dict | None:
         try:
             if email:
                 user = self._link.users.get_user_by_email(email=email)
@@ -51,58 +53,86 @@ class Bot:
             log.error(f"Ошибка создания канала для пользователя -> [{ex}]")
             return None
 
-    def generate_mr_notice(self) -> MessageCodeReviewNotice:
-        test_data = MsgTest(project_path="farzoom/common/common-api-pi-proxy",
-                            project_url='https://git.a-fin.tech/farzoom/common/common-api-pi-proxy')
-
-        field_project = MessageCodeReviewNoticeField(
-            short=False,
-            title="Проект:",
-            value=render_template('bot-msg-field-project.j2', test_data.dict())
-        )
-
-        print(field_project.dict())
-
-    def send_private_message(self, email: str, text: str):
+    def send_private_message(self, email: str, text: str) -> str | None:
         try:
             user = self._link.users.get_user_by_email(email=email)
             if user:
                 user_id = user["id"]
                 user_login = user["username"]
-                text = {"channel_id": f"{self._create_channel(user_id)}",
-                        "props": {
-                            "attachments": [
-                                {
-                                    "fallback": "Опа!",
-                                    "color": "#FF8000",
-                                    "text": f""":fire::fire::fire: \nПривет, @{user_login}! \n\nРады сообщить, что боги рандома избрали Тебя для проведения ревью кода любимого коллеги @drezn. :alarm3:\nМы очень расчитываем на тебя!""",
-                                    'author_name': 'Review Bot',
-                                    "author_icon": "https://mm.a-fin.tech/api/v4/users/pqqbmwtsai8fxcoudqehpwqkjc/image?_=1674196148597",
-                                    "author_link": "https://mm.a-fin.tech/absolut-bank/channels/devel",
-                                    "fields": [
-                                        {
-                                            "short": "false",
-                                            "title": "Проект:",
-                                            "value": "[farzoom/common/common-api-pi-proxy](https://git.a-fin.tech/farzoom/common/common-api-pi-proxy)\n[**DEVELOP**](https://git.a-fin.tech/farzoom/common/common-api-pi-proxy/-/tree/develop) :arrow_right: [**TEST-MR2**](https://git.a-fin.tech/farzoom/common/common-api-pi-proxy/-/tree/test-mr2)"
-                                        },
-                                        {
-                                            "short": "True",
-                                            "title": "Информация о MR:",
-                                            "value": "id-58 [DEVELOP](https://git.a-fin.tech/farzoom/common/common-api-pi-proxy/-/merge_requests/59)"
-                                        },
-                                        {
-                                            "short": "true",
-                                            "title": "Diffs:",
-                                            "value": "Количество [файлов](https://git.a-fin.tech/farzoom/common/common-api-pi-proxy/-/merge_requests/59/diffs) для ревью: [*8*]\nОбъем изменений: [**3000 байт**]"
-                                        }
-                                    ],
-                                    "image_url": "https://mtlynch.io/human-code-reviews-1/flowchart.png"
-                                }
-                            ]
-                        }}
-                msg = self._link.posts.create_post(text)
-                print(msg)
+                channel_id = self._create_channel(user_id)
+                if channel_id:
+                    return self._link.posts.create_post({"channel_id": channel_id,
+                                                         "message": text})
+                else:
+                    return None
+            else:
+                return None
         except ResourceNotFound:
             log.warning(f"Адресат [{email}] не найден в каналах Mattermost")
         except InvalidOrMissingParameters as ex:
             log.error(f"Неверно заданы параметры -> [{ex}]")
+
+    def send_mr_notice_message(self, queue_mr_result: MrCrResultData) -> dict | None:
+        try:
+            #todo Отключить!!
+
+            # user = self._link.users.get_user_by_email(queue_mr_result.mr_reviewer.email)
+            user = self._link.users.get_user_by_email('drezn@a-fin.tech')
+            if user:
+                user_id = user["id"]
+                channel_id = self._create_channel(user_id)
+                notice = self._generate_mr_notice(queue_mr_result)
+                if notice:
+                    notice.channel_id = channel_id
+                    msg = self._link.posts.create_post(notice.dict())
+                    return msg
+                else:
+                    return None
+        except ResourceNotFound:
+            log.warning(f"Адресат [{queue_mr_result.mr_reviewer.email}] не найден в каналах Mattermost")
+            return None
+        except InvalidOrMissingParameters as ex:
+            log.error(f"Неверно заданы параметры -> [{ex}]")
+            return None
+
+    def _generate_mr_notice(self, set_mr_setting_result: MrCrResultData) -> MessageCodeReviewNotice | None:
+
+        try:
+            fields = []
+            field_project = MessageCodeReviewNoticeField(
+                short=False,
+                title="Проект:",
+                value=render_template('bot-msg-field-project.j2', set_mr_setting_result.dict())
+            )
+            fields.append(field_project.dict())
+            field_mr = MessageCodeReviewNoticeField(
+                short=True,
+                title="Информация о MR:",
+                value=render_template('bot-msg-field-mr.j2', set_mr_setting_result.dict())
+            )
+            fields.append(field_mr.dict())
+            diff_variables = {"diff_url": set_mr_setting_result.diff_url,
+                              "diff_count": set_mr_setting_result.mr_diffs.count(),
+                              "diff_bytes": set_mr_setting_result.mr_diffs.sum_diff_scope()}
+            field_diffs = MessageCodeReviewNoticeField(
+                short=True,
+                title="Diffs:",
+                value=render_template('bot-msg-field-diffs.j2', diff_variables)
+            )
+            fields.append(field_diffs.dict())
+
+            msg_attachments = []
+            attachment_variables = {
+                "mr_reviewer_username": self.get_user_by_email(set_mr_setting_result.mr_reviewer.email)["username"],
+                "mr_author_username": self.get_user_by_email(set_mr_setting_result.mr_author.email)["username"],
+                "mr_url": set_mr_setting_result.mr_url}
+            msg_attachments.append(
+                MessageCodeReviewNoticeAttachment(text=render_template('bot-msg-text.j2', attachment_variables),
+                                                  fields=fields))
+
+            msg_notice = MessageCodeReviewNotice(props={"attachments": msg_attachments})
+            return msg_notice
+
+        except Exception as ex:
+            log.error(f"Ошибка генерации сообщения для бота -> {ex}")
+            return None

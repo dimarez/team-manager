@@ -10,8 +10,8 @@ from pydantic import parse_obj_as
 from yaml.scanner import ScannerError
 
 from reviewer.config import InitConfig
-from .schemas import GitUser, MrDiffList, MrDiff, User
-
+from .schemas import GitUser, MrDiffList, MrDiff, User, MrCrResultData
+from reviewer.utilites import render_template
 
 class Git:
     init_cfg: InitConfig
@@ -93,23 +93,51 @@ class Git:
             diffs.append(d, self.config["projects"]["skip"])
         return diffs
 
-    def set_mr_review_setting(self, reviewer: User, mr: ProjectMergeRequest) -> bool:
-        mr.assignee_ids = [reviewer.id]
-        mr.reviewer_ids = [reviewer.id]
+    def set_mr_review_setting(self,
+                              reviewer: User,
+                              author: User,
+                              mr: ProjectMergeRequest,
+                              project: gitlab.v4.objects.projects.Project,
+                              diffs: MrDiffList) -> MrCrResultData | None:
+
+        # mr.assignee_ids = [reviewer.id]
+        # mr.reviewer_ids = [reviewer.id]
+        mr.assignee_ids = [3]
+        mr.reviewer_ids = [3]
+
         mr.discussion_locked = True
-        text = f"""Привет @{mr.author["username"]}!
 
-Данный [MR]({mr.web_url}) был выбран для проведения **обязательного** ревью. Надеюсь, ты так же рад(а), как и мы!
-Твоим кодом будет восторгаться @{reviewer.username}, о чем мы незамедлительно сообщим в чате.
-
-Если продолжительное время нет реакции, советую обратиться [напрямую](https://mm.a-fin.tech) или к вашему тимлиду @{reviewer.lead}
-Желаем удачи!"""
+        text = render_template('git-mr-thread-body.j2', {"mr_author_username": mr.author["username"],
+                                                         "mr_web_url": mr.web_url,
+                                                         "reviewer_username": reviewer.username,
+                                                         "reviewer_lead": reviewer.lead})
         mr.discussions.create({'body': text})
         mr.save()
-        if mr.assignee['id'] == reviewer.id:
-            log.info(f"Настройки для MR установлены")
-            return True
+        #if mr.assignee['id'] == reviewer.id:
+        if mr.assignee['id'] == 3:
+            log.info(f"Настройки для MR {mr.references['full']} установлены")
+
+            mr_cr_result: MrCrResultData = MrCrResultData(
+                project_name=mr.references['full'],
+                project_id=project.id,
+                web_url=project.web_url,
+                source_branch=mr.source_branch,
+                target_branch=mr.target_branch,
+                mr_reviewer=reviewer,
+                mr_reviewer_avatar=mr.assignee["avatar_url"],
+                mr_reviewer_url=mr.assignee["web_url"],
+                mr_author=author,
+                mr_author_avatar=mr.author["avatar_url"],
+                mr_author_url=mr.author["web_url"],
+                mr_id=mr.iid,
+                mr_url=mr.web_url,
+                mr_title=mr.title,
+                mr_diffs=diffs,
+                created_at=mr.created_at,
+                updated_at=mr.updated_at
+            )
+            return mr_cr_result
         else:
             log.error(f"Ошибка установки значений code-review для MR [{mr.references['full']}. "
                       f"Итоговое значение assignee_ids не соответствует устанавливаемому")
-            return False
+            return None

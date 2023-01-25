@@ -28,5 +28,5 @@ class GitService:
     def check_project_exceptions(self, project):
         return self.git.check_project_exceptions(project)
 
-    def set_mr_review_setting(self, reviewer, mr):
-        return self.git.set_mr_review_setting(reviewer, mr)
+    def set_mr_review_setting(self, reviewer, author, mr, project, diffs):
+        return self.git.set_mr_review_setting(reviewer, author, mr, project, diffs)

@@ -1,4 +1,9 @@
+from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel, HttpUrl
+
+from reviewer.teams.schemas import User
 
 
 class Config(BaseModel):
@@ -9,29 +14,6 @@ class Config(BaseModel):
     port: int = 443
     request_timeout: int = 5
     basepath: str = "/api/v4"
-
-
-class MessageTemplateRenderData(BaseModel):
-    project_name: str
-    web_url: HttpUrl
-    branch_src: str
-    branch_src_link: HttpUrl
-    branch_dst: str
-    branch_dst_link: HttpUrl
-    mr_reviewer: str
-    mr_author: str
-    mr_id: str
-    mr_url: HttpUrl
-    mr_name: str
-    mr_diffs: str
-    diff_url: HttpUrl
-    diff_count: int
-    diff_bytes: int
-
-
-class MsgTest(BaseModel):
-    project_path: str
-    project_url: HttpUrl
 
 
 class MessageCodeReviewNoticeField(BaseModel):
@@ -52,5 +34,5 @@ class MessageCodeReviewNoticeAttachment(BaseModel):
 
 
 class MessageCodeReviewNotice(BaseModel):
-    channel_id: str = "asdas"
+    channel_id: Optional[str]
     props: dict[str, list[MessageCodeReviewNoticeAttachment]]

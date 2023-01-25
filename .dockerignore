@@ -11,3 +11,5 @@ dist
 .coverage
 html/*
 __pycache__
+/project.json
+/merge_req.json
