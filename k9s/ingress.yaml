@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: team-manager
+  namespace: afin-services
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    ingress.kubernetes.io/ssl-redirect: "true"
+    kubernetes.io/tls-acme: "true"
+spec:
+  tls:
+    - hosts:
+      - api.dev.a-fin.tech
+      secretName: team-manager-tls
+  rules:
+    - host: api.dev.a-fin.tech
+      http:
+        paths:
+        - path: /tm(/|$)(.*)
+          pathType: Prefix
+          backend:
+            service:
+              name: team-manager
+              port:
+                number: 8080
