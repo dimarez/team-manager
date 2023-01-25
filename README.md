@@ -6,7 +6,7 @@
 Соответствующие уведомления отправляются в чат команды платформы Mattermost
 
 Пример запроса:
-```http request
+```http
 # Токен авторизации передается через Header **abtoken**
 GET http://api.dev.a-fin.tech/tm/review?project_id={ID проекта в Gitlab}&mr_id={ID мердж-реквеста в контексте проекта}
 ```
