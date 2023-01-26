@@ -113,12 +113,6 @@ class Bot:
             )
             fields.append(field_diffs.dict())
 
-            # field_project = MessageCodeReviewNoticeField(
-            #     short=True,
-            #     title="Проект:",
-            #     value=render_template('bot-msg-field-project.j2', set_mr_setting_result.dict())
-            # )
-            # fields.append(field_project.dict())
             field_mr = MessageCodeReviewNoticeField(
                 short=False,
                 title="Информация о MR:",
