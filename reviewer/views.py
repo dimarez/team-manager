@@ -41,6 +41,10 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
     log.debug(mr)
     log.debug(project)
 
+    if len(mr.reviewers) > 0:
+        log.error("Повторный запрос на установку code-review пропущен")
+        raise HTTPException(status_code=204, detail="Настройки code-review уже установлены")
+
     if 'NoCodeReview' in mr.labels:
         log.info(f"MR [{mr_ref}] пропущен в соответствии с действующими исключениями фильтрами")
         log.warning(f"Для MR {mr_id} в проекте {project_id} установлен флаг 'NoCodeReview'")
