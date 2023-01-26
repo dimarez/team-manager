@@ -1,2 +1,6 @@
-Количество [файлов]({{diff_url}}) для ревью: [*{{diff_count}}*]
 Объем изменений: [**{{diff_bytes}} байт**]
+Количество [файлов]({{diff_url}}) для ревью: [*{{diff_count}}*]
+
+{% for item in diffs %}
+- {{ item.new_path}} [{{item.diff_size}} байт]
+{% endfor %}

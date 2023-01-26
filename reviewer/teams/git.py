@@ -154,5 +154,6 @@ class Git:
         except GitlabCreateError as ex:
             log.exception(f"Ошибка сохранения настроек MR для ревью -> [{ex}]")
             return None
-        except Exception:
+        except Exception as ex:
+            log.exception(ex)
             return None
