@@ -8,7 +8,7 @@ spec:
   selector:
     matchLabels:
       app: team-manager
-  replicas: 1
+  replicas: 3
   strategy:
     type: RollingUpdate
   template:
@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: team-manager
-        image: registry.dev.a-fin.tech/devops/team-manager:0.5.4
+        image: registry.dev.a-fin.tech/devops/team-manager:0.5.5
         resources:
           limits:
             cpu: "0.5"
