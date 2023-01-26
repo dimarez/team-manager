@@ -101,8 +101,20 @@ class Bot:
 
         try:
             fields = []
-            field_project = MessageCodeReviewNoticeField(
+            diff_variables = {"diff_url": set_mr_setting_result.diff_url,
+                              "diff_count": set_mr_setting_result.mr_diffs.count(),
+                              "diff_bytes": set_mr_setting_result.mr_diffs.sum_diff_scope(),
+                              "diffs": set_mr_setting_result.mr_diffs.diffs}
+
+            field_diffs = MessageCodeReviewNoticeField(
                 short=False,
+                title="Diffs:",
+                value=render_template('bot-msg-field-diffs.j2', diff_variables)
+            )
+            fields.append(field_diffs.dict())
+
+            field_project = MessageCodeReviewNoticeField(
+                short=True,
                 title="Проект:",
                 value=render_template('bot-msg-field-project.j2', set_mr_setting_result.dict())
             )
@@ -113,15 +125,6 @@ class Bot:
                 value=render_template('bot-msg-field-mr.j2', set_mr_setting_result.dict())
             )
             fields.append(field_mr.dict())
-            diff_variables = {"diff_url": set_mr_setting_result.diff_url,
-                              "diff_count": set_mr_setting_result.mr_diffs.count(),
-                              "diff_bytes": set_mr_setting_result.mr_diffs.sum_diff_scope()}
-            field_diffs = MessageCodeReviewNoticeField(
-                short=True,
-                title="Diffs:",
-                value=render_template('bot-msg-field-diffs.j2', diff_variables)
-            )
-            fields.append(field_diffs.dict())
 
             msg_attachments = []
             attachment_variables = {
