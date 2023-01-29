@@ -64,6 +64,7 @@ GET http://api.dev.a-fin.tech/tm/review?project_id={ID проекта в Gitlab}
     LOG_LEVEL=INFO (default: INFO)
     SERVER_ADDRESS=0.0.0.0 (default: 0.0.0.0)
     SERVER_PORT=8080 (default: 8080)
+    SERVER_WORKERS=3 (default: 3)
     TEAM_CONFIG_UPDATE_INTERVAL=60 (default: 60)
     SENTRY_DSN=(dsn) (default: Null)
     SENTRY_TRACES_SAMPLE_RATE=1.0 (default: 1.0)

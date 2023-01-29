@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: team-manager
-        image: registry.dev.a-fin.tech/devops/team-manager:0.5.7
+        image: registry.dev.a-fin.tech/devops/team-manager:0.5.8
         resources:
           limits:
             cpu: "0.5"

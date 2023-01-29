@@ -29,9 +29,9 @@ if init_config:
             traces_sample_rate=init_config.SENTRY_TRACES_SAMPLE_RATE,
         )
     bot = Bot(init_config)
-
     git = Git(init_config)
     team = Team(git=git)
+
     if not team:
         log.error("Ошибка инициализации базового класса")
         sys.exit()

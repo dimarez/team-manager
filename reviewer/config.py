@@ -29,6 +29,7 @@ class InitConfig(BaseModel):
     SERVER_TOKEN: str
     SERVER_ADDRESS: str = "0.0.0.0"
     SERVER_PORT: int = 8080
+    SERVER_WORKERS: int = 3
     TEAM_CONFIG_UPDATE_INTERVAL: int = 60
     SENTRY_DSN: Optional[HttpUrl]
     SENTRY_TRACES_SAMPLE_RATE: float = 1.0
