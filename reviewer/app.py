@@ -29,9 +29,9 @@ if init_config:
             traces_sample_rate=init_config.SENTRY_TRACES_SAMPLE_RATE,
         )
     bot = Bot(init_config)
-
     git = Git(init_config)
     team = Team(git=git)
+
     if not team:
         log.error("Ошибка инициализации базового класса")
         sys.exit()
@@ -50,6 +50,8 @@ def read_q():
         if qdata:
             msg = bot.send_mr_notice_message(qdata)
             if msg:
+                if init_config.MM_GROUP_CHANNEL_ID:
+                    bot.send_group_message(qdata)
                 log.info("Отправлено сообщение в чат")
                 log.debug(f"Отправлено сообщение в чат -> {msg}")
             else:
