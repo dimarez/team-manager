@@ -22,6 +22,7 @@ class InitConfig(BaseModel):
     MM_HOST: str
     MM_PORT: int = 443
     MM_BOT_MSG_INTERVAL: int = 30
+    MM_GROUP_CHANNEL_ID: Optional[str]
     TEAM_CONFIG_PROJECT: str
     TEAM_CONFIG_FILE: str = "team-config.yaml"
     TEAM_CONFIG_BRANCH: str = "master"
