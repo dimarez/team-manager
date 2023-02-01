@@ -45,7 +45,7 @@ class Bot:
             log.warning(f"Пользователь с email: [{email}] не найден в каналах Mattermost")
             return None
 
-    def _create_channel(self, user_id: str) -> str | None:
+    def _create_private_channel(self, user_id: str) -> str | None:
         try:
             channel = self._link.channels.create_direct_message_channel([self._bot_id, user_id])
             channel_id = channel["id"]
@@ -60,7 +60,7 @@ class Bot:
             user = self._link.users.get_user_by_email(email=email)
             if user:
                 user_id = user["id"]
-                channel_id = self._create_channel(user_id)
+                channel_id = self._create_private_channel(user_id)
                 if channel_id:
                     return self._link.posts.create_post({"channel_id": channel_id,
                                                          "message": text})
@@ -73,6 +73,17 @@ class Bot:
         except InvalidOrMissingParameters as ex:
             log.error(f"Неверно заданы параметры -> [{ex}]")
 
+    def send_group_message(self, queue_mr_result: MrCrResultData):
+        tmpl_variables = {
+            "mr_reviewer_username": self.get_user_by_email(queue_mr_result.mr_reviewer.email)["username"],
+            "mr_author_username": self.get_user_by_email(queue_mr_result.mr_author.email)["username"],
+            "mr_url": queue_mr_result.mr_url,
+            "project_name": queue_mr_result.project_name,
+        }
+
+        msg = render_template('bot-msg-group.j2', tmpl_variables)
+        self._link.posts.create_post({"channel_id": self._init_cfg.MM_GROUP_CHANNEL_ID, "message": msg})
+
     def send_mr_notice_message(self, queue_mr_result: MrCrResultData) -> dict | None:
         try:
             if self._init_cfg.DEBUG_REVIEWER_EMAIL:
@@ -82,7 +93,7 @@ class Bot:
             user = self._link.users.get_user_by_email(user_email)
             if user:
                 user_id = user["id"]
-                channel_id = self._create_channel(user_id)
+                channel_id = self._create_private_channel(user_id)
                 notice = self._generate_mr_notice(queue_mr_result)
                 if notice:
                     notice.channel_id = channel_id

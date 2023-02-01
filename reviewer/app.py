@@ -50,6 +50,8 @@ def read_q():
         if qdata:
             msg = bot.send_mr_notice_message(qdata)
             if msg:
+                if init_config.MM_GROUP_CHANNEL_ID:
+                    bot.send_group_message(qdata)
                 log.info("Отправлено сообщение в чат")
                 log.debug(f"Отправлено сообщение в чат -> {msg}")
             else:
