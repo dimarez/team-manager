@@ -22,6 +22,7 @@ class InitConfig(BaseModel):
     MM_HOST: str
     MM_PORT: int = 443
     MM_BOT_MSG_INTERVAL: int = 30
+    MM_GROUP_CHANNEL_ID: Optional[str]
     TEAM_CONFIG_PROJECT: str
     TEAM_CONFIG_FILE: str = "team-config.yaml"
     TEAM_CONFIG_BRANCH: str = "master"
@@ -29,6 +30,7 @@ class InitConfig(BaseModel):
     SERVER_TOKEN: str
     SERVER_ADDRESS: str = "0.0.0.0"
     SERVER_PORT: int = 8080
+    SERVER_WORKERS: int = 3
     TEAM_CONFIG_UPDATE_INTERVAL: int = 60
     SENTRY_DSN: Optional[HttpUrl]
     SENTRY_TRACES_SAMPLE_RATE: float = 1.0

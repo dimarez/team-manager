@@ -45,7 +45,7 @@ class Bot:
             log.warning(f"Пользователь с email: [{email}] не найден в каналах Mattermost")
             return None
 
-    def _create_channel(self, user_id: str) -> str | None:
+    def _create_private_channel(self, user_id: str) -> str | None:
         try:
             channel = self._link.channels.create_direct_message_channel([self._bot_id, user_id])
             channel_id = channel["id"]
@@ -60,7 +60,7 @@ class Bot:
             user = self._link.users.get_user_by_email(email=email)
             if user:
                 user_id = user["id"]
-                channel_id = self._create_channel(user_id)
+                channel_id = self._create_private_channel(user_id)
                 if channel_id:
                     return self._link.posts.create_post({"channel_id": channel_id,
                                                          "message": text})
@@ -73,6 +73,17 @@ class Bot:
         except InvalidOrMissingParameters as ex:
             log.error(f"Неверно заданы параметры -> [{ex}]")
 
+    def send_group_message(self, queue_mr_result: MrCrResultData):
+        tmpl_variables = {
+            "mr_reviewer_username": self.get_user_by_email(queue_mr_result.mr_reviewer.email)["username"],
+            "mr_author_username": self.get_user_by_email(queue_mr_result.mr_author.email)["username"],
+            "mr_url": queue_mr_result.mr_url,
+            "project_name": queue_mr_result.project_name,
+        }
+
+        msg = render_template('bot-msg-group.j2', tmpl_variables)
+        self._link.posts.create_post({"channel_id": self._init_cfg.MM_GROUP_CHANNEL_ID, "message": msg})
+
     def send_mr_notice_message(self, queue_mr_result: MrCrResultData) -> dict | None:
         try:
             if self._init_cfg.DEBUG_REVIEWER_EMAIL:
@@ -82,7 +93,7 @@ class Bot:
             user = self._link.users.get_user_by_email(user_email)
             if user:
                 user_id = user["id"]
-                channel_id = self._create_channel(user_id)
+                channel_id = self._create_private_channel(user_id)
                 notice = self._generate_mr_notice(queue_mr_result)
                 if notice:
                     notice.channel_id = channel_id
@@ -101,27 +112,24 @@ class Bot:
 
         try:
             fields = []
-            field_project = MessageCodeReviewNoticeField(
-                short=False,
-                title="Проект:",
-                value=render_template('bot-msg-field-project.j2', set_mr_setting_result.dict())
-            )
-            fields.append(field_project.dict())
-            field_mr = MessageCodeReviewNoticeField(
-                short=True,
-                title="Информация о MR:",
-                value=render_template('bot-msg-field-mr.j2', set_mr_setting_result.dict())
-            )
-            fields.append(field_mr.dict())
             diff_variables = {"diff_url": set_mr_setting_result.diff_url,
                               "diff_count": set_mr_setting_result.mr_diffs.count(),
-                              "diff_bytes": set_mr_setting_result.mr_diffs.sum_diff_scope()}
+                              "diff_bytes": set_mr_setting_result.mr_diffs.sum_diff_scope(),
+                              "diffs": set_mr_setting_result.mr_diffs.diffs}
+
             field_diffs = MessageCodeReviewNoticeField(
-                short=True,
+                short=False,
                 title="Diffs:",
                 value=render_template('bot-msg-field-diffs.j2', diff_variables)
             )
             fields.append(field_diffs.dict())
+
+            field_mr = MessageCodeReviewNoticeField(
+                short=False,
+                title="Информация о MR:",
+                value=render_template('bot-msg-field-mr.j2', set_mr_setting_result.dict())
+            )
+            fields.append(field_mr.dict())
 
             msg_attachments = []
             attachment_variables = {

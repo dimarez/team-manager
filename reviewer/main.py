@@ -10,7 +10,7 @@ if __name__ == '__main__':
         uvicorn.run("reviewer.app:app",
                     host=init_config.SERVER_ADDRESS,
                     port=init_config.SERVER_PORT,
-                    workers=3,
+                    workers=init_config.SERVER_WORKERS,
                     reload=False,
                     log_level=logging.getLevelName(init_config.LOG_LEVEL))
 
