@@ -45,6 +45,15 @@ class Bot:
             log.warning(f"Пользователь с email: [{email}] не найден в каналах Mattermost")
             return None
 
+    def get_user_by_username(self, username: str) -> dict | None:
+        try:
+            if username:
+                user = self._link.users.get_user_by_username(username)
+                return user
+        except ResourceNotFound:
+            log.warning(f"Пользователь с username: [{username}] не найден в каналах Mattermost")
+            return None
+
     def _create_private_channel(self, user_id: str) -> str | None:
         try:
             channel = self._link.channels.create_direct_message_channel([self._bot_id, user_id])
@@ -55,9 +64,9 @@ class Bot:
             log.error(f"Ошибка создания канала для пользователя -> [{ex}]")
             return None
 
-    def send_private_message(self, email: str, text: str) -> str | None:
+    def send_private_message(self, username: str, text: str) -> str | None:
         try:
-            user = self._link.users.get_user_by_email(email=email)
+            user = self.get_user_by_username(username)
             if user:
                 user_id = user["id"]
                 channel_id = self._create_private_channel(user_id)
@@ -69,14 +78,14 @@ class Bot:
             else:
                 return None
         except ResourceNotFound:
-            log.warning(f"Адресат [{email}] не найден в каналах Mattermost")
+            log.warning(f"Адресат [{username}] не найден в каналах Mattermost")
         except InvalidOrMissingParameters as ex:
             log.error(f"Неверно заданы параметры -> [{ex}]")
 
     def send_group_message(self, queue_mr_result: MrCrResultData):
         tmpl_variables = {
-            "mr_reviewer_username": self.get_user_by_email(queue_mr_result.mr_reviewer.email)["username"],
-            "mr_author_username": self.get_user_by_email(queue_mr_result.mr_author.email)["username"],
+            "mr_reviewer_username": self.get_user_by_username(queue_mr_result.mr_reviewer.uname)["username"],
+            "mr_author_username": self.get_user_by_username(queue_mr_result.mr_author.uname)["username"],
             "mr_url": queue_mr_result.mr_url,
             "project_name": queue_mr_result.project_name,
         }
@@ -86,11 +95,11 @@ class Bot:
 
     def send_mr_notice_message(self, queue_mr_result: MrCrResultData) -> dict | None:
         try:
-            if self._init_cfg.DEBUG_REVIEWER_EMAIL:
-                user_email = self._init_cfg.DEBUG_REVIEWER_EMAIL
+            if self._init_cfg.DEBUG_REVIEWER_USERNAME:
+                user_name = self._init_cfg.DEBUG_REVIEWER_USERNAME
             else:
-                user_email = queue_mr_result.mr_reviewer.email
-            user = self._link.users.get_user_by_email(user_email)
+                user_name = queue_mr_result.mr_reviewer.uname
+            user = self.get_user_by_username(user_name)
             if user:
                 user_id = user["id"]
                 channel_id = self._create_private_channel(user_id)
@@ -102,7 +111,7 @@ class Bot:
                 else:
                     return None
         except ResourceNotFound:
-            log.warning(f"Адресат [{queue_mr_result.mr_reviewer.email}] не найден в каналах Mattermost")
+            log.warning(f"Адресат [{queue_mr_result.mr_reviewer.uname}] не найден в каналах Mattermost")
             return None
         except InvalidOrMissingParameters as ex:
             log.error(f"Неверно заданы параметры -> [{ex}]")
@@ -133,8 +142,8 @@ class Bot:
 
             msg_attachments = []
             attachment_variables = {
-                "mr_reviewer_username": self.get_user_by_email(set_mr_setting_result.mr_reviewer.email)["username"],
-                "mr_author_username": self.get_user_by_email(set_mr_setting_result.mr_author.email)["username"],
+                "mr_reviewer_username": self.get_user_by_username(set_mr_setting_result.mr_reviewer.uname)["username"],
+                "mr_author_username": self.get_user_by_username(set_mr_setting_result.mr_author.uname)["username"],
                 "mr_url": set_mr_setting_result.mr_url}
             msg_attachments.append(
                 MessageCodeReviewNoticeAttachment(text=render_template('bot-msg-text.j2', attachment_variables),

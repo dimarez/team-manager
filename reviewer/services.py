@@ -5,14 +5,14 @@ class TeamService:
     def __init__(self, team):
         self.team: Team = team
 
-    def get_team_by_user(self, name: str):
-        return self.team.get_team_by_user(name)
+    # def get_team_by_user(self, name: str):
+    #     return self.team.get_team_by_user(name)
 
-    def get_random_reviewer_for_user(self, username: str):
-        return self.team.get_random_reviewer_for_user(username)
+    def get_random_reviewer_for_user(self, username: str, project: str):
+        return self.team.get_random_reviewer_for_user(username, project)
 
-    def get_user_by_name(self, name: str):
-        return self.team.get_user_by_name(name)
+    # def get_user_by_name(self, name: str):
+    #     return self.team.get_user_by_name(name)
 
 
 class GitService:

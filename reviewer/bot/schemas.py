@@ -23,8 +23,8 @@ class MessageCodeReviewNoticeAttachment(BaseModel):
     fallback: str = "Опа!"
     color: str = "#FF8000"
     author_name: str = "Review Bot"
-    author_icon: HttpUrl = "https://mm.a-fin.tech/api/v4/users/pqqbmwtsai8fxcoudqehpwqkjc/image?_=1674196148597"
-    author_link: HttpUrl = "https://mm.a-fin.tech/absolut-bank/channels/devel"
+    #author_icon: HttpUrl = "https://mm.a-fin.tech/api/v4/users/pqqbmwtsai8fxcoudqehpwqkjc/image?_=1674196148597"
+    author_link: HttpUrl = "https://chat.mvideo.ru/com/channels/tm-devel"
     #image_url: HttpUrl = "https://media.tenor.com/26GU1Sq64AcAAAAC/hacker.gif"
     #image_url: HttpUrl = "https://mm.a-fin.tech/files/sp1hxscfnpg9uenw4j5ajiemhc/public?h=jaseRz6y_gfgEEIRxuOl6d2MF3uLtLw8bWpwuu9am7g"
     text: str

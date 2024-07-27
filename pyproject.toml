@@ -10,7 +10,7 @@ packages = [{ include = "team_manager" }]
 python = "^3.11"
 pyyaml = "^6.0"
 pydantic = {extras = ["email"], version = "^1.10.4"}
-python-gitlab = "^3.12.0"
+python-gitlab = "^4.8.0"
 loguru = "^0.6.0"
 mattermostdriver = "^7.3.2"
 fastapi = "^0.89.1"

@@ -1,13 +1,16 @@
+import dataclasses
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
+import pydantic
 from pydantic import BaseModel, Extra, EmailStr, HttpUrl, root_validator
 
 
 class GitUser(BaseModel):
     id: int
     name: Optional[str]
-    email: EmailStr
+    uname: str
+    #email: Optional[EmailStr]
     avatar_url: Optional[str]
     web_url: Optional[str]
 
@@ -16,9 +19,24 @@ class GitUser(BaseModel):
 
 
 class User(GitUser):
-    team: str
+    team: Optional[str]
+    lead: Optional[str]
+    #uname: str
+    username: Optional[str]
+    channel: Optional[str]
+
+class Group(BaseModel):
+    name: str
+    channel: Optional[str]
     lead: str
-    username: str
+    #members: set[User]
+    reviewers: list[GitUser]
+
+@dataclasses.dataclass
+class Override():
+    name: str
+    components: List[str]
+    reviewers: List[GitUser]
 
 
 class MrInfo(BaseModel):

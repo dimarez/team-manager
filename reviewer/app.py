@@ -20,7 +20,6 @@ log.add(sys.stderr, level=logging.getLevelName(init_config.LOG_LEVEL))
 log.info(f"Уровень логирования выставлен на {init_config.LOG_LEVEL}")
 
 if init_config:
-
     if init_config.SENTRY_DSN:
         import sentry_sdk
 
@@ -48,6 +47,7 @@ def read_q():
     items = [msg_queue.get() for _ in range(msg_queue.qsize())]
     for qdata in items:
         if qdata:
+            log.debug(qdata)
             msg = bot.send_mr_notice_message(qdata)
             if msg:
                 if init_config.MM_GROUP_CHANNEL_ID:

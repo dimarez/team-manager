@@ -56,12 +56,13 @@ class Git:
 
     def get_user_data(self, username: str) -> GitUser | None:
         user = self.gl.users.list(username=username.strip())
+
         if user and user[0].state == "active":
             udata = GitUser(id=user[0].id,
                             name=user[0].name,
+                            uname=user[0].username,
                             avatar_url=user[0].avatar_url,
-                            web_url=user[0].web_url,
-                            email=user[0].email)
+                            web_url=user[0].web_url)
             return udata
         else:
             return None

@@ -23,8 +23,8 @@ def perform_healthcheck():
 async def set_review(mr_id: int = Query(default=Required), project_id: int = Query(default=Required),
                      team_service: TeamService = Depends(get_team_service),
                      git_service: GitService = Depends(get_git_service),
-                     abtoken: str | None = Header(default=None)):
-    if abtoken != init_config.SERVER_TOKEN:
+                     token: str | None = Header(default=None)):
+    if token != init_config.SERVER_TOKEN:
         log.error("Ошибка авторизации!")
         raise HTTPException(status_code=401, detail="Unauthorized")
     log.info(f"Получен запрос на настройку код-ревью для MR {mr_id}, project {project_id}")
@@ -43,7 +43,7 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
 
     if len(mr.reviewers) > 0:
         log.error("Повторный запрос на установку code-review пропущен")
-        raise HTTPException(status_code=204, detail="Настройки code-review уже установлены")
+        raise HTTPException(status_code=204, detail="Pass")
 
     if 'NoCodeReview' in mr.labels:
         log.info(f"MR [{mr_ref}] пропущен в соответствии с действующими исключениями фильтрами")
@@ -52,17 +52,22 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
 
     diffs = git_service.get_commit_info(mr)
     log.debug(diffs)
+
     # todo: перенести логику в сервис (проверка исключений)
     if git_service.check_project_exceptions(project.path_with_namespace) or diffs.count() == 0:
         log.info(f"MR [{mr_ref}] пропущен в соответствии с действующими исключениями фильтрами")
         raise HTTPException(status_code=204, detail="Pass")
 
     log.debug(f"По запрошенному MR с учетом фильтров найдено {diffs.count()} изменений")
-    reviewer: User = team_service.get_random_reviewer_for_user(mr.author["username"])
+    reviewer: User = team_service.get_random_reviewer_for_user(mr.author["username"], project.path_with_namespace)
     if not reviewer:
         raise HTTPException(status_code=204, detail="Pass")
 
     log.info(f"Для MR [{mr_ref}] выбран ревьювер {reviewer}")
+
+    if init_config.DEBUG_MR_SETUP:
+        return "DEBUG_SETUP_MR"
+
     set_mr_setting_result = git_service.set_mr_review_setting(reviewer,
                                                               team_service.get_user_by_name(mr.author['username']), mr,
                                                               project, diffs)

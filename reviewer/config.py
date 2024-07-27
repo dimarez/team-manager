@@ -36,6 +36,8 @@ class InitConfig(BaseModel):
     SENTRY_TRACES_SAMPLE_RATE: float = 1.0
     DEBUG_REVIEWER_ID: Optional[int]
     DEBUG_REVIEWER_EMAIL: Optional[EmailStr]
+    DEBUG_REVIEWER_USERNAME: Optional[str]
+    DEBUG_MR_SETUP: Optional[bool]
 
     @root_validator(pre=True)
     def to_uppercase(cls, values: dict):
