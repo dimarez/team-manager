@@ -1,1 +1,2 @@
-@{{ mr_author_username }} создал MR [*{{ project_name }}*]({{ mr_url }}), который была назначен для проверки на @{{ mr_reviewer_username }} :smirk:
+@{{ mr_author_username }} создал MR [*{{ project_name }}*]({{ mr_url }}), который был назначен для проверки на @{{ mr_reviewer_username }} :smirk:
+{% if mr_assignee_username %} Для MR назначен уполномоченный (Assignee) @{{ mr_assignee_username }}{% endif %}

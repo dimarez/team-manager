@@ -15,33 +15,36 @@ GET http://api.dev.a-fin.tech/tm/review?project_id={ID проекта в Gitlab}
 Пример ответа:
 ```json
 {
-    "mr_id": 62,
+    "mr_id": 2,
     "mr_author": {
-        "id": 3,
-        "name": "Дмитрий Резниченко",
-        "email": "drezn@a-fin.tech",
-        "avatar_url": "https://git.a-fin.tech/uploads/-/system/user/avatar/3/avatar.png",
-        "web_url": "https://git.a-fin.tech/reznichenko",
-        "team": "green",
-        "lead": "a.obedin",
-        "username": "reznichenko"
+        "id": 1101,
+        "name": "Резниченко Дмитрий",
+        "uname": "dmireznichenko",
+        "avatar_url": "https://gitlab.tech.mvideo.ru/uploads/-/system/user/avatar/1101/avatar.png",
+        "web_url": "https://gitlab.tech.mvideo.ru/dmireznichenko"
     },
     "mr_reviewer": {
-        "id": 43,
-        "name": "Сергей Артемов",
-        "email": "artemov@farzoom.com",
-        "avatar_url": "https://secure.gravatar.com/avatar/276d57790f119eaad1b2e9106c756105?s=80&d=identicon",
-        "web_url": "https://git.a-fin.tech/artemov",
-        "team": "green",
-        "lead": "a.obedin",
-        "username": "artemov"
+        "id": 583,
+        "name": "Гончаров Денис Юрьевич",
+        "uname": "dengoncharov",
+        "avatar_url": "https://secure.gravatar.com/avatar/7e0be92cc8be0fbd82d4ce1736f21d9ed7292ebeb3ccf589df2464af3c02c066?s=80&d=identicon",
+        "web_url": "https://gitlab.tech.mvideo.ru/dengoncharov"
     },
-    "created_at": "2023-01-25T16:46:51.364000+03:00",
-    "updated_at": "2023-01-25T18:01:09.077000+03:00",
-    "project_id": 408,
-    "project_name": "farzoom/common/common-api-pi-proxy!62",
-    "web_url": "https://git.a-fin.tech/farzoom/common/common-api-pi-proxy",
-    "timestamp": "2023-01-25T17:54:09.158969"
+    "created_at": "2024-07-28T06:59:06.684000+00:00",
+    "updated_at": "2024-07-28T09:03:08.116000+00:00",
+    "project_id": 4158,
+    "project_name": "mvideoru/dbue/test!2",
+    "review_channel": "rgmp1ca19pdktpn9efycace38r",
+    "review_team": "group2",
+    "review_lead": {
+        "id": 583,
+        "name": "Гончаров Денис Юрьевич",
+        "uname": "dengoncharov",
+        "avatar_url": "https://secure.gravatar.com/avatar/7e0be92cc8be0fbd82d4ce1736f21d9ed7292ebeb3ccf589df2464af3c02c066?s=80&d=identicon",
+        "web_url": "https://gitlab.tech.mvideo.ru/dengoncharov"
+    },
+    "web_url": "https://gitlab.tech.mvideo.ru/mvideoru/dbue/test",
+    "timestamp": "2024-07-28T12:03:02.606695"
 }
 ```
 
@@ -58,8 +61,7 @@ GET http://api.dev.a-fin.tech/tm/review?project_id={ID проекта в Gitlab}
 
     # Опциональные:
     MM_PORT=443 (default: 443)
-    MM_BOT_MSG_INTERVAL=30 (default: 30)
-    MM_GROUP_CHANNEL_ID='' (default: None)
+    MM_BOT_MSG_INTERVAL=30 (default: 30)    
     TEAM_CONFIG_FILE=team-config.yaml (default: team-config.yaml)
     TEAM_CONFIG_BRANCH=master (default: master)
     LOG_LEVEL=INFO (default: INFO)
@@ -73,40 +75,58 @@ GET http://api.dev.a-fin.tech/tm/review?project_id={ID проекта в Gitlab}
 
 ### Пример конфигурации команд (team-config.yaml):
 ```yaml
-    teams:
-      - team1:
-          lead: user1
-          members:
-            - user1
-            - user2
-            - user3
-          reviewers:
-            - user1
-            - user2
-            - user6
-      - team2:
-            lead: user1
-            members:
-              - user5
-              - user6
-              - user7
-            reviewers:
-              - user1
-              - user2
-              - user6
-              - user7
-    projects:
-      # Перечень проектов, которые попадаю в code-review при любых изменениях
-      always:
-        - farzoom/configs/afinance
-      # Перечень проектов, исключены из code-review
-      exclude:
-        - farzoom/common/common-api-pi-proxy
-      # Список файлов и расширений, изменения в которых будут игнорироваться
-      skip:
-        extensions:
-          - bpmn
-          - dmn
-        files:
-          - .gitlab-ci.yml
+teams:
+  - group1:
+      lead: user
+      channel: channel_id
+      assignee: user
+      members:
+        - user1                
+        - user2
+        - user6
+      reviewers:
+        - user8
+        - user1     
+        - user6 
+        - user10              
+  - group2:
+      lead: user
+      members:
+        - user11             
+        - user10  
+      reviewers:
+        - user1
+        - user2
+        - user6        
+
+projects:
+  # Перечень проектов с фиксированными ревьюверами (игнорируются ревьюверы из группы)
+  override:
+    - core-mpa:  
+        components: 
+              - mvideoru/dbue/path
+              - mvideoru/dbue/path2
+        reviewers:
+          - user1
+          - user2
+    - core-platform:
+        components: 
+              - mvideoru/dbue/shared-component
+              - mvideoru/dbue/shared-component2
+              - mvideoru/dbue/shared-component3
+        reviewers:
+          - user5
+          - user6
+      
+  # Перечень проектов, исключены из code-review
+  exclude:
+    - mvideoru/dbue/exclude
+    - mvideoru/dbue/exclude2
+  # Список файлов и расширений, изменения в которых будут игнорироваться
+  skip:
+    extensions:
+      - bpmn
+      - dmn
+    files:
+      - .gitlab-ci.yml
 ```

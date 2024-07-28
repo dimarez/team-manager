@@ -90,7 +90,8 @@ class Bot:
             "project_name": queue_mr_result.project_name,
         }
 
-
+        if queue_mr_result.mr_assignee:
+            tmpl_variables["mr_assignee_username"] = self.get_user_by_username(queue_mr_result.mr_assignee.uname)["username"]
 
         msg = render_template('bot-msg-group.j2', tmpl_variables)
         self._link.posts.create_post({"channel_id": queue_mr_result.review_channel, "message": msg})
