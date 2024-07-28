@@ -90,8 +90,10 @@ class Bot:
             "project_name": queue_mr_result.project_name,
         }
 
+
+
         msg = render_template('bot-msg-group.j2', tmpl_variables)
-        self._link.posts.create_post({"channel_id": self._init_cfg.MM_GROUP_CHANNEL_ID, "message": msg})
+        self._link.posts.create_post({"channel_id": queue_mr_result.review_channel, "message": msg})
 
     def send_mr_notice_message(self, queue_mr_result: MrCrResultData) -> dict | None:
         try:

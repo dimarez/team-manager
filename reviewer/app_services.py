@@ -1,6 +1,3 @@
-
-
-
 from .app import team, git
 from .services import TeamService, GitService
 

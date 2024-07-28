@@ -22,7 +22,7 @@ class InitConfig(BaseModel):
     MM_HOST: str
     MM_PORT: int = 443
     MM_BOT_MSG_INTERVAL: int = 30
-    MM_GROUP_CHANNEL_ID: Optional[str]
+    #MM_GROUP_CHANNEL_ID: Optional[str]
     TEAM_CONFIG_PROJECT: str
     TEAM_CONFIG_FILE: str = "team-config.yaml"
     TEAM_CONFIG_BRANCH: str = "master"
@@ -51,7 +51,7 @@ class InitConfig(BaseModel):
 
 def init_environment() -> InitConfig:
     try:
-        init_cfg = InitConfig.parse_obj(os.environ)
+        init_cfg: InitConfig = InitConfig.parse_obj(os.environ)
         return init_cfg
     except ValidationError as ex:
         log.error(f"Ошибка загрузки ENV-параметров конфигурации -> [{ex}]")

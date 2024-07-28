@@ -2,15 +2,13 @@ import dataclasses
 from datetime import datetime
 from typing import Optional, List
 
-import pydantic
-from pydantic import BaseModel, Extra, EmailStr, HttpUrl, root_validator
+from pydantic import BaseModel, Extra, HttpUrl, root_validator
 
 
 class GitUser(BaseModel):
     id: int
     name: Optional[str]
     uname: str
-    #email: Optional[EmailStr]
     avatar_url: Optional[str]
     web_url: Optional[str]
 
@@ -18,22 +16,15 @@ class GitUser(BaseModel):
         extra = Extra.allow
 
 
-class User(GitUser):
-    team: Optional[str]
-    lead: Optional[str]
-    #uname: str
-    username: Optional[str]
-    channel: Optional[str]
-
 class Group(BaseModel):
     name: str
     channel: Optional[str]
-    lead: str
-    #members: set[User]
+    lead: Optional[GitUser]
+    assignee: Optional[GitUser]
     reviewers: list[GitUser]
 
-@dataclasses.dataclass
-class Override():
+
+class Override(BaseModel):
     name: str
     components: List[str]
     reviewers: List[GitUser]
@@ -73,6 +64,9 @@ class MrDiffList(BaseModel):
 
 
 class MrCrResultData(BaseModel):
+    review_team: str
+    review_lead: Optional[GitUser]
+    review_channel: Optional[str]
     project_name: str
     project_id: int
     web_url: HttpUrl
@@ -80,10 +74,11 @@ class MrCrResultData(BaseModel):
     source_branch_link: Optional[HttpUrl]
     target_branch: str
     target_branch_link: Optional[HttpUrl]
-    mr_reviewer: User
+    mr_assignee: Optional[GitUser]
+    mr_reviewer: GitUser
     mr_reviewer_avatar: HttpUrl
     mr_reviewer_url: HttpUrl
-    mr_author: User
+    mr_author: GitUser
     mr_author_avatar: HttpUrl
     mr_author_url: HttpUrl
     mr_id: str

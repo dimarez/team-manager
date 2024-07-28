@@ -9,7 +9,7 @@ from loguru import logger as log
 def render_template(template_filename: str, context: dict) -> str | None:
     try:
         templates_dir = os.path.join(os.path.abspath(sys.path[0]), "templates")
-        env = Environment(loader=FileSystemLoader(templates_dir), autoescape=False)
+        env = Environment(loader=FileSystemLoader(templates_dir), autoescape=True)
 
         template = env.get_template(template_filename)
         output_from_parsed_template = template.render(context)

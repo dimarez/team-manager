@@ -5,3 +5,4 @@ poetry.lock
 /.fleet/
 /*.env
 /k9s/secrets.yaml
+.scannerwork
