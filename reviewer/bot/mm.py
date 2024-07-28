@@ -4,7 +4,7 @@ from mattermostdriver.exceptions import NoAccessTokenProvided, ResourceNotFound,
 from requests.exceptions import ConnectionError
 
 from reviewer.config import InitConfig
-from reviewer.teams.schemas import MrCrResultData
+from reviewer.teams.schemas import MrCrResultData, GitUser
 from reviewer.utilites import render_template
 from .schemas import Config, MessageCodeReviewNotice, \
     MessageCodeReviewNoticeField, MessageCodeReviewNoticeAttachment
@@ -83,45 +83,51 @@ class Bot:
             log.error(f"Неверно заданы параметры -> [{ex}]")
 
     def send_group_message(self, queue_mr_result: MrCrResultData):
-        tmpl_variables = {
-            "mr_reviewer_username": self.get_user_by_username(queue_mr_result.mr_reviewer.uname)["username"],
-            "mr_author_username": self.get_user_by_username(queue_mr_result.mr_author.uname)["username"],
-            "mr_url": queue_mr_result.mr_url,
-            "project_name": queue_mr_result.project_name,
-        }
-
-        if queue_mr_result.mr_assignee:
-            tmpl_variables["mr_assignee_username"] = self.get_user_by_username(queue_mr_result.mr_assignee.uname)[
-                "username"]
-
-        msg = render_template('bot-msg-group.j2', tmpl_variables)
-        self._link.posts.create_post({"channel_id": queue_mr_result.review_channel, "message": msg})
-
-    def send_mr_notice_message(self, queue_mr_result: MrCrResultData) -> dict | None:
         try:
-            if self._init_cfg.DEBUG_REVIEWER_USERNAME:
-                user_name = self._init_cfg.DEBUG_REVIEWER_USERNAME
-            else:
-                user_name = queue_mr_result.mr_reviewer.uname
-            user = self.get_user_by_username(user_name)
-            if user:
-                user_id = user["id"]
-                channel_id = self._create_private_channel(user_id)
-                notice = self._generate_mr_notice(queue_mr_result)
-                if notice:
-                    notice.channel_id = channel_id
-                    msg = self._link.posts.create_post(notice.dict())
-                    return msg
-                else:
-                    return None
-        except ResourceNotFound:
-            log.warning(f"Адресат [{queue_mr_result.mr_reviewer.uname}] не найден в каналах Mattermost")
-            return None
-        except InvalidOrMissingParameters as ex:
-            log.error(f"Неверно заданы параметры -> [{ex}]")
-            return None
+            mr_reviewers_username = [self.get_user_by_username(rev_uname.uname)["username"] for rev_uname in queue_mr_result.mr_reviewers]
+            tmpl_variables = {
+                "mr_reviewers_username": mr_reviewers_username,
+                "mr_author_username": self.get_user_by_username(queue_mr_result.mr_author.uname)["username"],
+                "mr_url": queue_mr_result.mr_url,
+                "project_name": queue_mr_result.project_name,
+            }
 
-    def _generate_mr_notice(self, set_mr_setting_result: MrCrResultData) -> MessageCodeReviewNotice | None:
+            if queue_mr_result.mr_assignee:
+                tmpl_variables["mr_assignee_username"] = self.get_user_by_username(queue_mr_result.mr_assignee.uname)[
+                    "username"]
+
+            msg = render_template('bot-msg-group.j2', tmpl_variables)
+            self._link.posts.create_post({"channel_id": queue_mr_result.review_channel, "message": msg})
+        except Exception as ex:
+            log.error(f"Возникла ошибка при отправке сообщения в групповой канал для команды [{queue_mr_result.review_team}] -> [{ex}]")
+
+    def send_mr_notice_message(self, queue_mr_result: MrCrResultData) -> list[dict] | None:
+        msg = []
+        for reviewer in queue_mr_result.mr_reviewers:
+            try:
+                if self._init_cfg.DEBUG_REVIEWER_USERNAME:
+                    user_name = self._init_cfg.DEBUG_REVIEWER_USERNAME
+                else:
+                    user_name = reviewer.uname
+                user = self.get_user_by_username(user_name)
+                if user:
+                    user_id = user["id"]
+                    channel_id = self._create_private_channel(user_id)
+                    notice = self._generate_mr_notice(queue_mr_result, reviewer)
+                    if notice:
+                        notice.channel_id = channel_id
+                        m = self._link.posts.create_post(notice.dict())
+                        msg.append(m)
+                        log.info("Отправлено сообщение в чат")
+                        log.debug(f"Отправлено сообщение в чат -> {m}")
+            except ResourceNotFound:
+                log.warning(f"Адресат [{reviewer.uname}] не найден в каналах Mattermost")
+            except InvalidOrMissingParameters as ex:
+                log.error(f"Неверно заданы параметры -> [{ex}]")
+
+        return msg
+
+    def _generate_mr_notice(self, set_mr_setting_result: MrCrResultData, reviewer: GitUser) -> MessageCodeReviewNotice | None:
 
         try:
             fields = []
@@ -146,9 +152,9 @@ class Bot:
 
             msg_attachments = []
             attachment_variables = {
-                "mr_reviewer_username": self.get_user_by_username(set_mr_setting_result.mr_reviewer.uname)["username"],
+                "mr_reviewer_username": self.get_user_by_username(reviewer.uname)["username"],
                 "mr_author_username": self.get_user_by_username(set_mr_setting_result.mr_author.uname)["username"],
-                "mr_url": set_mr_setting_result.mr_url}
+                "mr_url": f"{set_mr_setting_result.mr_url}#note_{reviewer.thread_id}"}
             msg_attachments.append(
                 MessageCodeReviewNoticeAttachment(text=render_template('bot-msg-text.j2', attachment_variables),
                                                   fields=fields))

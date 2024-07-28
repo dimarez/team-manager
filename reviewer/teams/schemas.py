@@ -10,6 +10,7 @@ class GitUser(BaseModel):
     uname: str
     avatar_url: Optional[str]
     web_url: Optional[str]
+    thread_id: Optional[int]
 
     class Config:
         extra = Extra.allow
@@ -18,6 +19,7 @@ class GitUser(BaseModel):
 class Group(BaseModel):
     name: str
     channel: Optional[str]
+    quantity: int
     lead: Optional[GitUser]
     assignee: Optional[GitUser]
     reviewers: list[GitUser]
@@ -74,7 +76,7 @@ class MrCrResultData(BaseModel):
     target_branch: str
     target_branch_link: Optional[HttpUrl]
     mr_assignee: Optional[GitUser]
-    mr_reviewer: GitUser
+    mr_reviewers: list[GitUser]
     mr_reviewer_avatar: HttpUrl
     mr_reviewer_url: HttpUrl
     mr_author: GitUser

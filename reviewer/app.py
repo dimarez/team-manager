@@ -55,15 +55,13 @@ def read_q():
         if queue_mr_result:
             log.debug(queue_mr_result)
             msg = bot.send_mr_notice_message(queue_mr_result)
-            if msg:
-                if queue_mr_result.review_channel:
-                    bot.send_group_message(queue_mr_result)
-                log.info("Отправлено сообщение в чат")
-                log.debug(f"Отправлено сообщение в чат -> {msg}")
-            else:
+            if queue_mr_result.review_channel:
+                bot.send_group_message(queue_mr_result)
+            if not len(msg):
                 msg_error_queue.put(queue_mr_result)
                 msg_queue.put(queue_mr_result)
                 log.error(f"Ошибка ивента отправки в чат. Item отправлен в очередь с ошибками {queue_mr_result}")
+
 
 
 app.include_router(api_router)

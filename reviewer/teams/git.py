@@ -99,76 +99,92 @@ class Git:
             diffs.append(d, self.config["projects"]["skip"])
         return diffs
 
-    def set_mr_review_setting(self,
-                              reviewer: GitUser,
-                              author: GitUser,
-                              team: Group,
-                              mr: ProjectMergeRequest,
-                              project: gitlab.v4.objects.projects.Project,
-                              diffs: MrDiffList) -> MrCrResultData | None:
+    def set_mr_review_setting(
+            self,
+            reviewers: list[GitUser],
+            author: GitUser,
+            team: Group,
+            mr: ProjectMergeRequest,
+            project: gitlab.v4.objects.projects.Project,
+            diffs: MrDiffList
+    ) -> MrCrResultData | None:
 
-        if self.cfg.DEBUG_REVIEWER_ID:
-            mr.assignee_ids = [self.cfg.DEBUG_REVIEWER_ID]
-            mr.reviewer_ids = [self.cfg.DEBUG_REVIEWER_ID]
-        else:
-            if team.assignee:
-                log.info(
-                    f"Для команды [{team.name}] установлен фиксированный ответственный (assignee) [{team.assignee.name} ({team.assignee.uname})]")
-                mr.assignee_ids = [team.assignee.id]
-            else:
-                mr.assignee_ids = [reviewer.id]
-            mr.reviewer_ids = [reviewer.id]
-
-        mr.discussion_locked = True
-
-        ctx = {"mr_author_username": mr.author["username"],
-               "mr_web_url": mr.web_url,
-               "reviewer_username": reviewer.uname}
-
-        if team.lead:
-            ctx["reviewer_lead"] = team.lead.uname
-
-        text = render_template('git-mr-thread-body.j2', ctx)
-        try:
-            mr.discussions.create({'body': text})
-            mr.save()
+        def assign_reviewers_and_assignees():
+            """Назначает ревьюеров и ответственных в зависимости от конфигурации и команды."""
             if self.cfg.DEBUG_REVIEWER_ID:
-                rev_id = self.cfg.DEBUG_REVIEWER_ID
+                mr.assignee_ids = [self.cfg.DEBUG_REVIEWER_ID]
+                mr.reviewer_ids = [self.cfg.DEBUG_REVIEWER_ID]
             else:
-                rev_id = reviewer.id
-            if mr.reviewers[0]['id'] == rev_id:
-                log.info(f"Настройки для MR {mr.references['full']} установлены")
-
-                mr_cr_result: MrCrResultData = MrCrResultData(
-                    review_team=team.name,
-                    review_lead=team.lead,
-                    review_channel=team.channel,
-                    project_name=mr.references['full'],
-                    project_id=project.id,
-                    web_url=project.web_url,
-                    source_branch=mr.source_branch,
-                    target_branch=mr.target_branch,
-                    mr_reviewer=reviewer,
-                    mr_reviewer_avatar=mr.assignee["avatar_url"],
-                    mr_reviewer_url=mr.assignee["web_url"],
-                    mr_author=author,
-                    mr_author_avatar=mr.author["avatar_url"],
-                    mr_author_url=mr.author["web_url"],
-                    mr_id=mr.iid,
-                    mr_url=mr.web_url,
-                    mr_title=mr.title,
-                    mr_diffs=diffs,
-                    created_at=mr.created_at,
-                    updated_at=mr.updated_at
-                )
                 if team.assignee:
-                    mr_cr_result.mr_assignee = team.assignee
-                return mr_cr_result
+                    log.info(
+                        f"Для команды [{team.name}] установлен фиксированный ответственный (assignee) [{team.assignee.name} ({team.assignee.uname})]")
+                    mr.assignee_ids = [team.assignee.id]
+                elif reviewers:
+                    mr.assignee_ids = [reviewers[0].id]
+                else:
+                    log.error("Список ревьюеров пуст")
+                    return False
+                mr.reviewer_ids = [rev.id for rev in reviewers]
+            return True
 
+        def create_discussion_threads():
+            """Создает обсуждения для каждого ревьюера."""
+            for reviewer in reviewers:
+                ctx = {
+                    "mr_author_username": mr.author["username"],
+                    "mr_web_url": mr.web_url,
+                    "reviewer_username": reviewer.uname,
+                    "reviewer_lead": team.lead.uname if team.lead else None
+                }
+                text = render_template('git-mr-thread-body.j2', ctx)
+                discussion = mr.discussions.create({'body': text})
+                if discussion:
+                    reviewer.thread_id = discussion.attributes['notes'][0]["id"]
+
+        def build_mr_cr_result_data():
+            """Формирует данные результата для MR."""
+            return MrCrResultData(
+                review_team=team.name,
+                review_lead=team.lead,
+                review_channel=team.channel,
+                project_name=mr.references['full'],
+                project_id=project.id,
+                web_url=project.web_url,
+                source_branch=mr.source_branch,
+                target_branch=mr.target_branch,
+                mr_reviewers=reviewers,
+                mr_reviewer_avatar=mr.assignee["avatar_url"],
+                mr_reviewer_url=mr.assignee["web_url"],
+                mr_author=author,
+                mr_author_avatar=mr.author["avatar_url"],
+                mr_author_url=mr.author["web_url"],
+                mr_id=mr.iid,
+                mr_url=mr.web_url,
+                mr_title=mr.title,
+                mr_diffs=diffs,
+                created_at=mr.created_at,
+                updated_at=mr.updated_at,
+                mr_assignee=team.assignee if team.assignee else None
+            )
+
+        try:
+            if not assign_reviewers_and_assignees():
+                return None
+
+            mr.discussion_locked = False
+
+            create_discussion_threads()
+
+            res = mr.save()
+
+            if res:
+                log.info(f"Настройки для MR {mr.references['full']} установлены")
+                return build_mr_cr_result_data(res)
             else:
-                log.error(f"Ошибка установки значений code-review для MR [{mr.references['full']}. "
+                log.error(f"Ошибка установки значений code-review для MR [{mr.references['full']}]. "
                           f"Итоговое значение assignee_ids не соответствует устанавливаемому")
                 return None
+
         except GitlabCreateError as ex:
             log.exception(f"Ошибка сохранения настроек MR для ревью -> [{ex}]")
             return None

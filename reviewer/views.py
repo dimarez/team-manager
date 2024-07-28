@@ -59,22 +59,24 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
 
     log.debug(f"По запрошенному MR с учетом фильтров найдено {diffs.count()} изменений")
 
-    reviewer: GitUser = team_service.get_random_reviewer_for_user(mr.author["username"], project.path_with_namespace)
-
-    if not reviewer:
+    reviewers: list[GitUser] = team_service.get_random_reviewer_for_user(mr.author["username"],
+                                                                        project.path_with_namespace)
+    if len(reviewers) == 0:
+        log.warning(f"Для MR [{mr_ref}] не удалось выбрать ревьювера")
         raise HTTPException(status_code=204, detail="Pass")
 
-    log.info(f"Для MR [{mr_ref}] выбран ревьювер {reviewer}")
+    log.info(f"Для MR [{mr_ref}] выбран ревьювер {reviewers}")
 
     if init_config.DEBUG_MR_SETUP:
-        return "DEBUG_SETUP_MR"
+        raise HTTPException(status_code=200, detail="DEBUG_MR_SETUP=true")
 
     user: dict = team_service.get_user_by_username(mr.author['username'])
     team: Group = team_service.get_team(user["team"])
-    set_mr_setting_result: MrCrResultData = git_service.set_mr_review_setting(reviewer,
-                                                                              user["info"],
-                                                                              team,
-                                                                              mr, project, diffs)
+
+    set_mr_setting_result: MrCrResultData = git_service.set_mr_review_setting(reviewers,
+                                                                          user["info"],
+                                                                          team,
+                                                                          mr, project, diffs)
     if not set_mr_setting_result:
         log.error("Ошибка сохранения значений для MR")
         raise HTTPException(status_code=500, detail="Ошибка сохранения значений для MR")

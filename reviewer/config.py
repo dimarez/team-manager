@@ -48,9 +48,9 @@ class InitConfig(BaseModel):
         return upper_val
 
 
-def init_environment() -> BaseModel:
+def init_environment() -> InitConfig:
     try:
-        init_cfg: BaseModel = InitConfig.parse_obj(os.environ)
+        init_cfg: InitConfig = InitConfig.parse_obj(os.environ)
         return init_cfg
     except ValidationError as ex:
         log.error(f"Ошибка загрузки ENV-параметров конфигурации -> [{ex}]")
