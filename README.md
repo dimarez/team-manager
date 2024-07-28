@@ -79,6 +79,7 @@ teams:
       lead: user
       channel: channel_id
       assignee: user
+      quantity: 2
       members:
         - user1                
         - user2
@@ -101,7 +102,8 @@ teams:
 projects:
   # Перечень проектов с фиксированными ревьюверами (игнорируются ревьюверы из группы)
   override:
-    - core-mpa:  
+    - core-mpa:
+        quantity: 2
         components: 
               - mvideoru/dbue/path
               - mvideoru/dbue/path2

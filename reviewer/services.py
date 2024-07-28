@@ -11,7 +11,7 @@ class TeamService:
     def get_team(self, name: str):
         return self.team.get_team(name)
 
-    def get_random_reviewer_for_user(self, username: str, project: str) -> GitUser:
+    def get_random_reviewer_for_user(self, username: str, project: str) -> list[GitUser]:
         return self.team.get_random_reviewer_for_user(username, project)
 
     def get_user_by_username(self, name: str) -> dict:
@@ -31,10 +31,10 @@ class GitService:
     def check_project_exceptions(self, project):
         return self.git.check_project_exceptions(project)
 
-    def set_mr_review_setting(self, reviewer: GitUser,
+    def set_mr_review_setting(self, reviewers: list[GitUser],
                               author: GitUser,
                               team: Group,
                               mr: ProjectMergeRequest,
                               project: Project,
                               diffs: MrDiffList):
-        return self.git.set_mr_review_setting(reviewer, author, team, mr, project, diffs)
+        return self.git.set_mr_review_setting(reviewers, author, team, mr, project, diffs)
