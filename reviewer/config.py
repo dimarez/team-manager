@@ -22,12 +22,11 @@ class InitConfig(BaseModel):
     MM_HOST: str
     MM_PORT: int = 443
     MM_BOT_MSG_INTERVAL: int = 30
-    MM_GROUP_CHANNEL_ID: Optional[str]
     TEAM_CONFIG_PROJECT: str
     TEAM_CONFIG_FILE: str = "team-config.yaml"
     TEAM_CONFIG_BRANCH: str = "master"
     LOG_LEVEL: LogLevel = LogLevel.INFO
-    SERVER_TOKEN: str
+    AUTH_TOKEN: Optional[str]
     SERVER_ADDRESS: str = "0.0.0.0"
     SERVER_PORT: int = 8080
     SERVER_WORKERS: int = 3
@@ -36,6 +35,8 @@ class InitConfig(BaseModel):
     SENTRY_TRACES_SAMPLE_RATE: float = 1.0
     DEBUG_REVIEWER_ID: Optional[int]
     DEBUG_REVIEWER_EMAIL: Optional[EmailStr]
+    DEBUG_REVIEWER_USERNAME: Optional[str]
+    DEBUG_MR_SETUP: Optional[bool]
 
     @root_validator(pre=True)
     def to_uppercase(cls, values: dict):
@@ -47,9 +48,9 @@ class InitConfig(BaseModel):
         return upper_val
 
 
-def init_environment() -> InitConfig:
+def init_environment() -> BaseModel:
     try:
-        init_cfg = InitConfig.parse_obj(os.environ)
+        init_cfg: BaseModel = InitConfig.parse_obj(os.environ)
         return init_cfg
     except ValidationError as ex:
         log.error(f"Ошибка загрузки ENV-параметров конфигурации -> [{ex}]")

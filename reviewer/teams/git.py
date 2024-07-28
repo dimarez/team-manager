@@ -11,7 +11,7 @@ from yaml.scanner import ScannerError
 
 from reviewer.config import InitConfig
 from reviewer.utilites import render_template
-from .schemas import GitUser, MrDiffList, MrDiff, User, MrCrResultData
+from .schemas import GitUser, MrDiffList, MrDiff, MrCrResultData, Group
 
 
 class Git:
@@ -55,13 +55,16 @@ class Git:
                 f"{self.cfg.GITLAB_URL}/{self.cfg.TEAM_CONFIG_PROJECT} -> [{ex}]")
 
     def get_user_data(self, username: str) -> GitUser | None:
+        if not username:
+            return None
         user = self.gl.users.list(username=username.strip())
+
         if user and user[0].state == "active":
             udata = GitUser(id=user[0].id,
                             name=user[0].name,
+                            uname=user[0].username,
                             avatar_url=user[0].avatar_url,
-                            web_url=user[0].web_url,
-                            email=user[0].email)
+                            web_url=user[0].web_url)
             return udata
         else:
             return None
@@ -97,8 +100,9 @@ class Git:
         return diffs
 
     def set_mr_review_setting(self,
-                              reviewer: User,
-                              author: User,
+                              reviewer: GitUser,
+                              author: GitUser,
+                              team: Group,
                               mr: ProjectMergeRequest,
                               project: gitlab.v4.objects.projects.Project,
                               diffs: MrDiffList) -> MrCrResultData | None:
@@ -107,15 +111,24 @@ class Git:
             mr.assignee_ids = [self.cfg.DEBUG_REVIEWER_ID]
             mr.reviewer_ids = [self.cfg.DEBUG_REVIEWER_ID]
         else:
-            mr.assignee_ids = [reviewer.id]
+            if team.assignee:
+                log.info(
+                    f"Для команды [{team.name}] установлен фиксированный ответственный (assignee) [{team.assignee.name} ({team.assignee.uname})]")
+                mr.assignee_ids = [team.assignee.id]
+            else:
+                mr.assignee_ids = [reviewer.id]
             mr.reviewer_ids = [reviewer.id]
 
         mr.discussion_locked = True
 
-        text = render_template('git-mr-thread-body.j2', {"mr_author_username": mr.author["username"],
-                                                         "mr_web_url": mr.web_url,
-                                                         "reviewer_username": reviewer.username,
-                                                         "reviewer_lead": reviewer.lead})
+        ctx = {"mr_author_username": mr.author["username"],
+               "mr_web_url": mr.web_url,
+               "reviewer_username": reviewer.uname}
+
+        if team.lead:
+            ctx["reviewer_lead"] = team.lead.uname
+
+        text = render_template('git-mr-thread-body.j2', ctx)
         try:
             mr.discussions.create({'body': text})
             mr.save()
@@ -123,10 +136,13 @@ class Git:
                 rev_id = self.cfg.DEBUG_REVIEWER_ID
             else:
                 rev_id = reviewer.id
-            if mr.assignee['id'] == rev_id:
+            if mr.reviewers[0]['id'] == rev_id:
                 log.info(f"Настройки для MR {mr.references['full']} установлены")
 
                 mr_cr_result: MrCrResultData = MrCrResultData(
+                    review_team=team.name,
+                    review_lead=team.lead,
+                    review_channel=team.channel,
                     project_name=mr.references['full'],
                     project_id=project.id,
                     web_url=project.web_url,
@@ -145,6 +161,8 @@ class Git:
                     created_at=mr.created_at,
                     updated_at=mr.updated_at
                 )
+                if team.assignee:
+                    mr_cr_result.mr_assignee = team.assignee
                 return mr_cr_result
 
             else:

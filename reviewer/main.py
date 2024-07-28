@@ -12,6 +12,7 @@ if __name__ == '__main__':
                     port=init_config.SERVER_PORT,
                     workers=init_config.SERVER_WORKERS,
                     reload=False,
+                    access_log=False,
                     log_level=logging.getLevelName(init_config.LOG_LEVEL))
 
     except Exception as ex:

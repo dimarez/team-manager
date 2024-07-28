@@ -1,100 +1,174 @@
 import random
 
+import pydantic
 from loguru import logger as log
 
 from .git import Git
-from .schemas import User, GitUser
+from .schemas import GitUser, Override, Group
 
 
 class Team:
-    _users: dict[str, User]
-    _reviewers: dict[str: list[str]]
+    _groups: dict[str, Group]
+    _members: dict
     git: Git
+    _overrides: list[Override]
 
     def __init__(self, git: Git):
         self.git = git
-        self._load_team_setup()
+        self._load_team_config()
+        self._load_override_config()
 
     def update_config(self):
         is_upd = self.git.load_config()
         if is_upd:
-            self._load_team_setup()
+            self._load_team_config()
+            self._load_override_config()
 
-    # todo: Прорефакторить парсинг конфига
-    def _load_team_setup(self):
-        team_setup = self.git.config
-        users: {str: User} = {}
-        ucache: list = []
-        reviewers: dict = {}
-        for team in team_setup["teams"]:
-            for k, v in team.items():
-                reviewers[k] = v["reviewers"]
-                for member in v["members"]:
-                    member = str(member).strip()
-                    if member not in ucache:
-                        udata: GitUser = self.git.get_user_data(username=member)
-                        if udata:
-                            udata.team = k
-                            udata.lead = v["lead"]
-                            udata.username = member
-                            user = User.parse_obj(udata)
-                            users[member] = user
-                            ucache.append(member)
-                for reviewer in v["reviewers"]:
-                    reviewer = str(reviewer).strip()
-                    if reviewer not in ucache:
-                        udata: GitUser = self.git.get_user_data(username=reviewer)
-                        if udata:
-                            udata.team = k
-                            udata.lead = v["lead"]
-                            udata.username = reviewer
-                            user = User.parse_obj(udata)
-                            users[reviewer] = user
-                            ucache.append(reviewer)
-        ucache.clear()
+    def _load_override_config(self):
+        project_setup = self.git.config["projects"]["override"]
+        self._overrides = [self._create_override(name, val) for sets in project_setup for name, val in sets.items()]
 
-        self._users = users
-        self._reviewers = reviewers
+    def _create_override(self, name, val):
+        users = [self.git.get_user_data(username=rev) for rev in val["reviewers"]]
+        try:
+            over = Override(name=name, components=val.get("components"), reviewers=users)
+        except Exception as e:
+            log.error(f"Ошибка чтения override-блока конфигурации [{name}]. Блок будет пропущен! -> [{e}]")
+            return None
+        return over
 
-    def get_random_reviewer_for_user(self, username: str) -> str | None:
-        if username:
-            user_team = self.get_team_by_user(username)
-            if user_team:
-                reviewer = self._get_random_reviewer_by_team(user_team, username)
-                return reviewer
+    def _load_team_config(self):
+        team_setup = self.git.config["teams"]
+        self._members = self._load_users(team_setup)
+        self._groups = self._load_teams(team_setup)
+
+        log.debug(f"Результат загрузки пользователей из конфигурации: {self._members}")
+        log.debug(f"Результат загрузки групп из конфигурации: {self._groups}")
+
+    def _load_users(self, team_setup):
+        users = {}
+        for setup in team_setup:
+            for team_name, team_info in setup.items():
+                for member in team_info["members"]:
+                    if member not in users:
+                        user_data = self.git.get_user_data(username=member)
+                        if user_data:
+                            users[member] = {"team": team_name, "info": user_data}
+        return users
+
+    def _load_teams(self, team_setup):
+        groups = {}
+        for setup in team_setup:
+            for team_name, team_info in setup.items():
+                valid_reviewers = self._get_valid_reviewers(team_info["reviewers"])
+                if valid_reviewers:
+                    self._process_team(groups, team_name, team_info, valid_reviewers)
+        return groups
+
+    def _process_team(self, groups, team_name, team_info, valid_reviewers):
+        try:
+            lead = self.git.get_user_data(username=team_info.get("lead"))
+            channel = team_info.get("channel")
+            assignee = self._get_assignee(team_info)
+
+            group = Group(
+                name=team_name,
+                lead=lead,
+                channel=channel,
+                reviewers=valid_reviewers
+            )
+
+            if assignee:
+                group.assignee = assignee
+
+            groups[team_name] = group
+        except pydantic.error_wrappers.ValidationError as e:
+            log.error(
+                f"Ошибка в чтении конфигурации на этапе парсинга команды [{team_name}]. Настройки команды не будут учтены! -> [{e}]"
+            )
+
+    def _get_assignee(self, team_info):
+        assignee_username = team_info.get("assignee")
+        return self.git.get_user_data(username=assignee_username) if assignee_username else None
+
+    def _get_valid_reviewers(self, reviewers):
+        valid_reviewers = []
+        for reviewer in reviewers:
+            reviewer_data = self.git.get_user_data(username=reviewer)
+            if reviewer_data:
+                valid_reviewers.append(reviewer_data)
             else:
-                log.error(f"Инициатор MR [{username}] не найден в списках команды")
+                log.warning(f"Пользователь [{reviewer}] указан в конфигурации, но не найден в Gitlab!")
+        return valid_reviewers
+
+    def _check_project_for_override(self, project: str) -> tuple[bool, str] | tuple[bool, None]:
+        for over in self._overrides:
+            if project in over.components:
+                return True, over.name
+        return False, None
+
+    def get_random_reviewer_for_user(self, username: str, project: str) -> GitUser | None:
+
+        res, over_group = self._check_project_for_override(project)
+
+        if res:
+            log.info(f"Проект [{project}] найден в исключениях! Ревьюверы будут выбраны из списков [{over_group}]")
+            over_rev = self._get_random_reviewer_by_override_group(over_group, username)
+
+            if not over_rev:
+                log.error("Невозможно выбрать ревьювера. Нет доступных разработчиков")
                 return None
+            return over_rev
+
+        if username:
+            user = self.get_user_by_username(username)
+            if not user:
+                log.warning(f"Пользователь [{username}] не найден в конфигурации")
+                return None
+            reviewer = self._get_random_reviewer(user)
+            return reviewer
         else:
             return None
 
-    def get_user_by_name(self, name: str) -> (User, None):
+    def _get_random_reviewer_by_override_group(self, over_group: str, cur_user: str) -> GitUser | None:
+        group = over_group.strip()
+        cur_user = cur_user.strip()
+
+        if not group or not cur_user:
+            return None
+
+        used_over = [over for over in self._overrides if over.name == group]
+        available_reviewers = [reviewer for reviewer in used_over[0].reviewers if reviewer.uname != cur_user]
+
+        if not available_reviewers:
+            return None
+
+        reviewer = random.sample(available_reviewers, 1)[0]
+        return reviewer
+
+    def _get_random_reviewer(self, cur_user: dict) -> GitUser | None:
+
+        if not cur_user:
+            return None
+
+        available_reviewers: list[GitUser] = [reviewer for reviewer in self._groups[cur_user["team"]].reviewers if
+                                              reviewer.uname != cur_user["info"].uname]
+
+        if not available_reviewers:
+            log.error("Невозможно выбрать ревьювера. Нет доступных разработчиков")
+            return None
+        return random.sample(available_reviewers, 1)[0]
+
+    def get_user_by_username(self, name: str) -> dict | None:
         if name.strip():
             try:
-                user = self._users[name]
+                user = self._members[name]
                 return user
             except KeyError:
                 return None
 
-    def get_team_by_user(self, name: str) -> (str, None):
+    def get_team(self, name: str) -> Group | None:
         if name.strip():
-            try:
-                team = self._users[name].team
-                return team
-            except KeyError:
-                return None
-
-    def _get_random_reviewer_by_team(self, team: str, cur_user: str) -> User | None:
-        if team.strip() and cur_user.strip():
-            try:
-                i = 0
-                reviewer = cur_user.strip()
-                while reviewer.strip() == cur_user.strip():
-                    reviewer = random.choice(self._reviewers[team])
-                    i += 1
-                    if i == 10:
-                        log.error("Невозможно выбрать ревьювера. Нет доступных разработчиков")
-                        return None
-                return self._users[reviewer]
-            except KeyError:
-                return None
+            return self._groups[name]
+        else:
+            return None
