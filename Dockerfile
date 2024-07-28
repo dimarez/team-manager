@@ -1,12 +1,8 @@
-FROM python:alpine3.17
+FROM python:3.11-slim
 
 ENV TZ=Europe/Moscow
 COPY requirements.txt /tmp/requirements.txt
-RUN ln -fns /usr/share/zoneinfo/Europe/Moscow /etc/localtime && \
-    echo $TZ > /etc/timezone && \
-    apk add --update --no-cache git && \
-    pip3 install -r /tmp/requirements.txt && \
-    rm -rf /var/cache/apk/*
+RUN pip3 install -r /tmp/requirements.txt
 
 WORKDIR /opt
 ADD reviewer /opt/reviewer
