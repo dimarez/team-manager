@@ -74,7 +74,8 @@ class Team:
                             if assignee:
                                 groups[team_name].assignee = assignee
                     except pydantic.error_wrappers.ValidationError as e:
-                        log.error(f"Ошибка в чтении конфигурации на этапе парсинга команды [{team_name}]. Настройки команды не будут учтены! -> [{e}]")
+                        log.error(
+                            f"Ошибка в чтении конфигурации на этапе парсинга команды [{team_name}]. Настройки команды не будут учтены! -> [{e}]")
         print(groups)
         return groups
 

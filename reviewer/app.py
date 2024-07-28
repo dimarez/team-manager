@@ -63,7 +63,7 @@ def read_q():
             else:
                 msg_error_queue.put(queue_mr_result)
                 msg_queue.put(queue_mr_result)
-                log.error(f"Ошибка эвента отправки в чат. Item отправлен в очередь с ошибками {queue_mr_result}")
+                log.error(f"Ошибка ивента отправки в чат. Item отправлен в очередь с ошибками {queue_mr_result}")
 
 
 app.include_router(api_router)

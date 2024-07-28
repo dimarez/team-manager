@@ -24,7 +24,6 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
                      team_service: TeamService = Depends(get_team_service),
                      git_service: GitService = Depends(get_git_service),
                      apikey: str | None = Header(default=None)):
-
     if init_config.AUTH_TOKEN and apikey != init_config.AUTH_TOKEN.strip():
         log.error("Ошибка авторизации!")
         raise HTTPException(status_code=401, detail="Unauthorized")
@@ -54,7 +53,6 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
     diffs = git_service.get_commit_info(mr)
     log.debug(diffs)
 
-    # todo: перенести логику в сервис (проверка исключений)
     if git_service.check_project_exceptions(project.path_with_namespace) or diffs.count() == 0:
         log.info(f"MR [{mr_ref}] пропущен в соответствии с действующими исключениями фильтрами")
         raise HTTPException(status_code=204, detail="Pass")
