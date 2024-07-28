@@ -123,7 +123,6 @@ class Team:
             if not over_rev:
                 log.error("Невозможно выбрать ревьювера. Нет доступных разработчиков")
                 return None
-            print(over_rev)
             return over_rev
 
         if username:
