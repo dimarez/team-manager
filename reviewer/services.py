@@ -1,7 +1,7 @@
 from gitlab.v4.objects import ProjectMergeRequest, Project
 
 from .teams import Team, Git
-from .teams.schemas import GitUser, MrDiffList, Group
+from .teams.schemas import GitUser, MrDiffList, Group, Override
 
 
 class TeamService:
@@ -11,7 +11,7 @@ class TeamService:
     def get_team(self, name: str):
         return self.team.get_team(name)
 
-    def get_random_reviewer_for_user(self, username: str, project: str) -> list[GitUser]:
+    def get_random_reviewer_for_user(self, username: str, project: str) -> tuple[list[GitUser], Override] | tuple[list[GitUser], None] | tuple[None, None]:
         return self.team.get_random_reviewer_for_user(username, project)
 
     def get_user_by_username(self, name: str) -> dict:
@@ -31,10 +31,12 @@ class GitService:
     def check_project_exceptions(self, project):
         return self.git.check_project_exceptions(project)
 
-    def set_mr_review_setting(self, reviewers: list[GitUser],
+    def set_mr_review_setting(self,
+                              reviewers: list[GitUser],
                               author: GitUser,
                               team: Group,
+                              override: Override,
                               mr: ProjectMergeRequest,
                               project: Project,
                               diffs: MrDiffList):
-        return self.git.set_mr_review_setting(reviewers, author, team, mr, project, diffs)
+        return self.git.set_mr_review_setting(reviewers, author, team, override, mr, project, diffs)

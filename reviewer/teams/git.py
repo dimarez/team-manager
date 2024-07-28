@@ -11,7 +11,7 @@ from yaml.scanner import ScannerError
 
 from reviewer.config import InitConfig
 from reviewer.utilites import render_template
-from .schemas import GitUser, MrDiffList, MrDiff, MrCrResultData, Group
+from .schemas import GitUser, MrDiffList, MrDiff, MrCrResultData, Group, Override
 
 
 def _create_discussion_threads(reviewers: list[GitUser], team: Group, mr: ProjectMergeRequest):
@@ -30,14 +30,14 @@ def _create_discussion_threads(reviewers: list[GitUser], team: Group, mr: Projec
 
 
 def _build_mr_cr_result_data(
-        reviewers: list[GitUser], author: GitUser, team: Group, mr: ProjectMergeRequest,
+        reviewers: list[GitUser], author: GitUser, team: Group, override: Override, mr: ProjectMergeRequest,
         project: gitlab.v4.objects.projects.Project, diffs: MrDiffList
 ) -> MrCrResultData:
     """Формирует данные результата для MR."""
     return MrCrResultData(
         review_team=team.name,
         review_lead=team.lead,
-        review_channel=team.channel,
+        review_channel=override.channel or team.channel,
         project_name=mr.references['full'],
         project_id=project.id,
         web_url=project.web_url,
@@ -149,6 +149,7 @@ class Git:
             reviewers: list[GitUser],
             author: GitUser,
             team: Group,
+            override: Override,
             mr: ProjectMergeRequest,
             project: gitlab.v4.objects.projects.Project,
             diffs: MrDiffList
@@ -165,7 +166,7 @@ class Git:
 
             if res:
                 log.info(f"Настройки для MR {mr.references['full']} установлены")
-                return _build_mr_cr_result_data(reviewers, author, team, mr, project, diffs)
+                return _build_mr_cr_result_data(reviewers, author, team, override, mr, project, diffs)
             else:
                 log.error(f"Ошибка установки значений code-review для MR [{mr.references['full']}]. "
                           f"Итоговое значение assignee_ids не соответствует устанавливаемому")

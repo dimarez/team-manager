@@ -28,6 +28,7 @@ class Group(BaseModel):
 class Override(BaseModel):
     name: str
     quantity: int
+    channel: Optional[str]
     components: List[str]
     reviewers: List[GitUser]
 

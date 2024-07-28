@@ -9,7 +9,7 @@ from .app import init_config, msg_queue
 from .app_services import get_team_service, get_git_service
 from .schemas import MrSetupAnswer
 from .services import TeamService, GitService
-from .teams.schemas import GitUser, MrCrResultData, Group
+from .teams.schemas import GitUser, MrCrResultData, Group, Override
 
 api_router = APIRouter()
 
@@ -59,8 +59,9 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
 
     log.debug(f"По запрошенному MR с учетом фильтров найдено {diffs.count()} изменений")
 
-    reviewers: list[GitUser] = team_service.get_random_reviewer_for_user(mr.author["username"],
+    reviewers, override_group = team_service.get_random_reviewer_for_user(mr.author["username"],
                                                                         project.path_with_namespace)
+
     if len(reviewers) == 0:
         log.warning(f"Для MR [{mr_ref}] не удалось выбрать ревьювера")
         raise HTTPException(status_code=204, detail="Pass")
@@ -74,9 +75,11 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
     team: Group = team_service.get_team(user["team"])
 
     set_mr_setting_result: MrCrResultData = git_service.set_mr_review_setting(reviewers,
-                                                                          user["info"],
-                                                                          team,
-                                                                          mr, project, diffs)
+                                                                              user["info"],
+                                                                              team,
+                                                                              override_group,
+                                                                              mr,
+                                                                              project, diffs)
     if not set_mr_setting_result:
         log.error("Ошибка сохранения значений для MR")
         raise HTTPException(status_code=500, detail="Ошибка сохранения значений для MR")
