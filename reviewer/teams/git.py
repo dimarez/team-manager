@@ -179,7 +179,7 @@ class Git:
 
             if res:
                 log.info(f"Настройки для MR {mr.references['full']} установлены")
-                return build_mr_cr_result_data(res)
+                return build_mr_cr_result_data()
             else:
                 log.error(f"Ошибка установки значений code-review для MR [{mr.references['full']}]. "
                           f"Итоговое значение assignee_ids не соответствует устанавливаемому")
