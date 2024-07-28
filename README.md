@@ -104,6 +104,7 @@ projects:
   override:
     - core-mpa:
         quantity: 2
+        channel: channel_id
         components: 
               - mvideoru/dbue/path
               - mvideoru/dbue/path2
