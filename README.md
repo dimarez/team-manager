@@ -79,6 +79,7 @@ teams:
       lead: user
       channel: channel_id
       assignee: user
+      quantity: 2
       members:
         - user1                
         - user2
