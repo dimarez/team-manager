@@ -1,32 +1,52 @@
 teams:
-  - team1:
-      lead: user1
+  - group1:
+      lead: user
+      channel: channel_id
+      assignee: user
+      quantity: 2
       members:
         - user1
         - user2
-        - user3
+        - user6
+      reviewers:
+        - user8
+        - user1
+        - user6
+        - user10
+  - group2:
+      lead: user
+      members:
+        - user11
+        - user10
       reviewers:
         - user1
         - user2
         - user6
-  - team2:
-      lead: user1
-      members:
-        - user5
-        - user6
-        - user7
-      reviewers:
-        - user1
-        - user2
-        - user6
-        - user7
+
 projects:
-  # Перечень проектов, которые попадаю в code-review при любых изменениях
-  always:
-    - farzoom/configs/afinance
+  # Перечень проектов с фиксированными ревьюверами (игнорируются ревьюверы из группы)
+  override:
+    - core-mpa:
+        quantity: 2
+        components:
+              - mvideoru/dbue/path
+              - mvideoru/dbue/path2
+        reviewers:
+          - user1
+          - user2
+    - core-platform:
+        components:
+              - mvideoru/dbue/shared-component
+              - mvideoru/dbue/shared-component2
+              - mvideoru/dbue/shared-component3
+        reviewers:
+          - user5
+          - user6
+
   # Перечень проектов, исключены из code-review
   exclude:
-    - farzoom/common/common-api-pi-proxy
+    - mvideoru/dbue/exclude
+    - mvideoru/dbue/exclude2
   # Список файлов и расширений, изменения в которых будут игнорироваться
   skip:
     extensions:
@@ -34,6 +54,4 @@ projects:
       - dmn
     files:
       - .gitlab-ci.yml
-
-
 

@@ -31,7 +31,10 @@ class Team:
     def _create_override(self, name, val):
         users = [self.git.get_user_data(username=rev) for rev in val["reviewers"]]
         try:
-            over = Override(name=name, components=val.get("components"), reviewers=users)
+            over = Override(name=name,
+                            quantity=val.get("quantity", 1),
+                            components=val.get("components"),
+                            reviewers=users)
         except Exception as e:
             log.error(f"Ошибка чтения override-блока конфигурации [{name}]. Блок будет пропущен! -> [{e}]")
             return None
@@ -120,7 +123,8 @@ class Team:
             if not over_rev:
                 log.error("Невозможно выбрать ревьювера. Нет доступных разработчиков")
                 return None
-            return [over_rev]
+            print(over_rev)
+            return over_rev
 
         if username:
             user = self.get_user_by_username(username)
@@ -132,21 +136,28 @@ class Team:
         else:
             return None
 
-    def _get_random_reviewer_by_override_group(self, over_group: str, cur_user: str) -> GitUser | None:
-        group = over_group.strip()
+    def _get_random_reviewer_by_override_group(self, over_group: str, cur_user: str) -> list[GitUser] | None:
+        over_group = over_group.strip()
         cur_user = cur_user.strip()
 
-        if not group or not cur_user:
+        if not over_group or not cur_user:
             return None
 
-        used_over = [over for over in self._overrides if over.name == group]
+        used_over = [over for over in self._overrides if over.name == over_group]
         available_reviewers = [reviewer for reviewer in used_over[0].reviewers if reviewer.uname != cur_user]
 
         if not available_reviewers:
             return None
 
-        reviewer = random.sample(available_reviewers, 1)[0]
-        return reviewer
+        if len(available_reviewers) < used_over[0].quantity:
+            log.warning(f"Количество ревьюверов [{used_over[0].quantity}] для исключения (override) [{used_over[0].name}] "
+                        f"больше доступных пользователей [{len(available_reviewers)}]. Будет выбран один ревьювер!")
+
+            reviewers = random.sample(available_reviewers, 1)
+        else:
+            reviewers = random.sample(available_reviewers, used_over[0].quantity)
+
+        return [rev for rev in reviewers]
 
     def _get_random_reviewer(self, cur_user: dict) -> list[GitUser] | None:
 
