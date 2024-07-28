@@ -1,5 +1,6 @@
 import logging
 import sys
+from contextlib import asynccontextmanager
 from queue import Queue
 
 from fastapi import FastAPI
@@ -39,6 +40,10 @@ from .views import api_router
 
 app = FastAPI()
 
+@app.on_event("startup")
+@repeat_every(seconds=init_config.TEAM_CONFIG_UPDATE_INTERVAL, logger=log, wait_first=True)
+def periodic():
+    team.update_config()
 
 @app.on_event("startup")
 @repeat_every(seconds=init_config.MM_BOT_MSG_INTERVAL, logger=log, wait_first=True)
@@ -58,12 +63,5 @@ def read_q():
                 msg_error_queue.put(qdata)
                 msg_queue.put(qdata)
                 log.error(f"Ошибка эвента отправки в чат. Item отправлен в очередь с ошибками {qdata}")
-
-
-@app.on_event("startup")
-@repeat_every(seconds=init_config.TEAM_CONFIG_UPDATE_INTERVAL, logger=log, wait_first=True)
-def periodic():
-    team.update_config()
-
 
 app.include_router(api_router)

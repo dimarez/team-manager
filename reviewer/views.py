@@ -9,7 +9,7 @@ from .app import init_config, msg_queue
 from .app_services import get_team_service, get_git_service
 from .schemas import MrSetupAnswer
 from .services import TeamService, GitService
-from .teams.schemas import User
+from .teams.schemas import User, GitUser
 
 api_router = APIRouter()
 
@@ -59,11 +59,18 @@ async def set_review(mr_id: int = Query(default=Required), project_id: int = Que
         raise HTTPException(status_code=204, detail="Pass")
 
     log.debug(f"По запрошенному MR с учетом фильтров найдено {diffs.count()} изменений")
-    reviewer: User = team_service.get_random_reviewer_for_user(mr.author["username"], project.path_with_namespace)
+
+
+    #todo: Рефачим это
+    reviewer: GitUser = team_service.get_random_reviewer_for_user(mr.author["username"], project.path_with_namespace)
+
     if not reviewer:
         raise HTTPException(status_code=204, detail="Pass")
 
     log.info(f"Для MR [{mr_ref}] выбран ревьювер {reviewer}")
+
+
+    ################################################
 
     if init_config.DEBUG_MR_SETUP:
         return "DEBUG_SETUP_MR"

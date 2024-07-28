@@ -1,4 +1,5 @@
 from .teams import Team, Git
+from .teams.schemas import GitUser
 
 
 class TeamService:
@@ -8,7 +9,7 @@ class TeamService:
     # def get_team_by_user(self, name: str):
     #     return self.team.get_team_by_user(name)
 
-    def get_random_reviewer_for_user(self, username: str, project: str):
+    def get_random_reviewer_for_user(self, username: str, project: str) -> GitUser:
         return self.team.get_random_reviewer_for_user(username, project)
 
     # def get_user_by_name(self, name: str):
