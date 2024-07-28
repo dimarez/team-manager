@@ -62,22 +62,34 @@ class Team:
             for team_name, team_info in setup.items():
                 valid_reviewers = self._get_valid_reviewers(team_info["reviewers"])
                 if valid_reviewers:
-                    try:
-                        groups[team_name] = Group(
-                            name=team_name,
-                            lead=self.git.get_user_data(username=team_info.get("lead")),
-                            channel=team_info.get("channel"),
-                            reviewers=valid_reviewers
-                        )
-                        if team_info.get("assignee"):
-                            assignee = self.git.get_user_data(username=team_info.get("assignee"))
-                            if assignee:
-                                groups[team_name].assignee = assignee
-                    except pydantic.error_wrappers.ValidationError as e:
-                        log.error(
-                            f"Ошибка в чтении конфигурации на этапе парсинга команды [{team_name}]. Настройки команды не будут учтены! -> [{e}]")
-        print(groups)
+                    self._process_team(groups, team_name, team_info, valid_reviewers)
         return groups
+
+    def _process_team(self, groups, team_name, team_info, valid_reviewers):
+        try:
+            lead = self.git.get_user_data(username=team_info.get("lead"))
+            channel = team_info.get("channel")
+            assignee = self._get_assignee(team_info)
+
+            group = Group(
+                name=team_name,
+                lead=lead,
+                channel=channel,
+                reviewers=valid_reviewers
+            )
+
+            if assignee:
+                group.assignee = assignee
+
+            groups[team_name] = group
+        except pydantic.error_wrappers.ValidationError as e:
+            log.error(
+                f"Ошибка в чтении конфигурации на этапе парсинга команды [{team_name}]. Настройки команды не будут учтены! -> [{e}]"
+            )
+
+    def _get_assignee(self, team_info):
+        assignee_username = team_info.get("assignee")
+        return self.git.get_user_data(username=assignee_username) if assignee_username else None
 
     def _get_valid_reviewers(self, reviewers):
         valid_reviewers = []
