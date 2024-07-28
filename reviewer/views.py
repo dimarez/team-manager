@@ -23,8 +23,9 @@ def perform_healthcheck():
 async def set_review(mr_id: int = Query(default=Required), project_id: int = Query(default=Required),
                      team_service: TeamService = Depends(get_team_service),
                      git_service: GitService = Depends(get_git_service),
-                     token: str | None = Header(default=None)):
-    if token != init_config.SERVER_TOKEN:
+                     apikey: str | None = Header(default=None)):
+
+    if init_config.AUTH_TOKEN and apikey != init_config.AUTH_TOKEN.strip():
         log.error("Ошибка авторизации!")
         raise HTTPException(status_code=401, detail="Unauthorized")
     log.info(f"Получен запрос на настройку код-ревью для MR {mr_id}, project {project_id}")

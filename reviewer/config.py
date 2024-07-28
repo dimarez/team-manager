@@ -26,7 +26,7 @@ class InitConfig(BaseModel):
     TEAM_CONFIG_FILE: str = "team-config.yaml"
     TEAM_CONFIG_BRANCH: str = "master"
     LOG_LEVEL: LogLevel = LogLevel.INFO
-    SERVER_TOKEN: str
+    AUTH_TOKEN: Optional[str]
     SERVER_ADDRESS: str = "0.0.0.0"
     SERVER_PORT: int = 8080
     SERVER_WORKERS: int = 3

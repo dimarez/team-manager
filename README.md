@@ -8,8 +8,8 @@
 
 Пример запроса:
 ```http
-# Токен авторизации передается через Header **abtoken**
-GET http://api.dev.a-fin.tech/tm/review?project_id={ID проекта в Gitlab}&mr_id={ID мердж-реквеста в контексте проекта}
+# Токен авторизации передается через Header **apikey** (Если установлен параметр окружения AUTH_TOKEN)
+GET http://url-to-service/review?project_id={ID проекта в Gitlab}&mr_id={ID мердж-реквеста в контексте проекта}
 ```
 
 Пример ответа:
@@ -55,11 +55,11 @@ GET http://api.dev.a-fin.tech/tm/review?project_id={ID проекта в Gitlab}
     GITLAB_TOKEN=(token)
     GITLAB_URL=https://git.a-fin.tech
     MM_HOST=mm.a-fin.tech
-    MM_TOKEN=(token)    
-    SERVER_TOKEN=(token) 
+    MM_TOKEN=(token)
     TEAM_CONFIG_PROJECT=farzoom/configs/team-config
 
     # Опциональные:
+    AUTH_TOKEN=(token) (default: Null)
     MM_PORT=443 (default: 443)
     MM_BOT_MSG_INTERVAL=30 (default: 30)    
     TEAM_CONFIG_FILE=team-config.yaml (default: team-config.yaml)
