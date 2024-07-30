@@ -7,6 +7,7 @@ from gitlab.exceptions import GitlabAuthenticationError, GitlabGetError, GitlabC
 from gitlab.v4.objects import ProjectMergeRequest
 from loguru import logger as log
 from pydantic import parse_obj_as
+from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
 from reviewer.config import InitConfig
@@ -75,10 +76,10 @@ class Git:
         try:
             self.gl.auth()
             log.info(f"Модуль успешно подключен к {init_cfg.GITLAB_URL}")
-            self.load_config()
         except (GitlabAuthenticationError, Exception) as ex:
             log.error(f"Ошибка подключения к ресурсу {init_cfg.GITLAB_URL} -> [{ex}]")
             sys.exit()
+        self.load_config()
 
     def load_config(self) -> bool:
         project = self.gl.projects.get(self.cfg.TEAM_CONFIG_PROJECT)
@@ -98,10 +99,11 @@ class Git:
                 return True
             else:
                 return False
-        except (GitlabGetError, ScannerError) as ex:
+        except (GitlabGetError, ScannerError, ParserError) as ex:
             log.error(
                 f"Ошибка загрузки файла командной конфигурации ({self.cfg.TEAM_CONFIG_FILE}) в проекте "
                 f"{self.cfg.GITLAB_URL}/{self.cfg.TEAM_CONFIG_PROJECT} -> [{ex}]")
+            sys.exit()
 
     def get_user_data(self, username: str) -> GitUser | None:
         if not username:
