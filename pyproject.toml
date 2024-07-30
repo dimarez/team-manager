@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "team-manager"
-version = "0.6.0"
+version = "1.2.4"
 description = "Сервис автоматического управления code-review"
 authors = ["Dmitriy Reznichenko <drezn@a-fin.tech>"]
 readme = "README.md"

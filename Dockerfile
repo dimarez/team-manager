@@ -1,6 +1,7 @@
 FROM python:3.11-slim
 
 ENV TZ=Europe/Moscow
+
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install -r /tmp/requirements.txt
 
