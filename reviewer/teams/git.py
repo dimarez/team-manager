@@ -34,10 +34,14 @@ def _build_mr_cr_result_data(
         project: gitlab.v4.objects.projects.Project, diffs: MrDiffList
 ) -> MrCrResultData:
     """Формирует данные результата для MR."""
+    if override and override.channel:
+        channel = override.channel
+    else:
+        channel = team.channel
     return MrCrResultData(
         review_team=team.name,
         review_lead=team.lead,
-        review_channel=override.channel or team.channel,
+        review_channel=channel,
         project_name=mr.references['full'],
         project_id=project.id,
         web_url=project.web_url,
